@@ -1,9 +1,13 @@
 package br.com.crispimlanches.loja_virtual_crispim.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.util.Date;
 
 @Data
@@ -11,10 +15,20 @@ import java.util.Date;
 public class Auditable {
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date creationDate;
+    @Column(name = "create_date", nullable = false)
+    @CreationTimestamp
+    private Date createDate;
 
+    @Column(name = "update_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @UpdateTimestamp
     private Date updateDate;
 
+    public void onCreate(){
+        this.createDate = new Date();
+    }
 
+    public void onUpdate(){
+        this.updateDate = new Date();
+    }
 }

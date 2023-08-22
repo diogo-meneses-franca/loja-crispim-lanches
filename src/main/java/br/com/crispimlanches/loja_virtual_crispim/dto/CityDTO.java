@@ -5,12 +5,11 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class AddrStateDTO {
+public class CityDTO {
     private Long id;
     private String name;
-    private String acronym;
-    private Boolean status;
+    private AddrStateDTO state;
+    private boolean status;
     private Date createDate;
     private Date updateDate;
-
 }

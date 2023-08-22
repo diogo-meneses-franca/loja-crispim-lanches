@@ -2,6 +2,7 @@ package br.com.crispimlanches.loja_virtual_crispim.controller;
 
 import br.com.crispimlanches.loja_virtual_crispim.dto.AddrStateDTO;
 import br.com.crispimlanches.loja_virtual_crispim.service.AddrStateService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,11 +25,13 @@ public class AddrStateController {
     }
 
     @PutMapping
+    @Transactional
     public ResponseEntity<AddrStateDTO> update(@RequestBody AddrStateDTO addrStateDTO){
         return addrStateService.update(addrStateDTO);
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<String> delete(@PathVariable("id") Long addrStateId){
         return addrStateService.delete(addrStateId);
     }

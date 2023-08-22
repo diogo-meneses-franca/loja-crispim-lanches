@@ -21,7 +21,7 @@ public class Address extends Auditable {
     private String district;
     @ManyToOne
     private City city;
-    private String zipCode;
+    private String postCode;
     @ManyToOne
     private User user;
 

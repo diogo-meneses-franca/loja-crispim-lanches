@@ -1,12 +1,12 @@
-package entity;
+package br.com.crispimlanches.loja_virtual_crispim.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "productBrand")
+@Table(name = "category")
 @Data
-public class ProductBrand {
+public class Category extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

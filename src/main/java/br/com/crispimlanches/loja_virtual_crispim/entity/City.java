@@ -1,19 +1,26 @@
-package entity;
+package br.com.crispimlanches.loja_virtual_crispim.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "city")
 @Data
-@Table(name="user")
 @NoArgsConstructor
-public class User extends Auditable{
+public class City extends Auditable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
-    private String email;
+
+    @ManyToOne
+    @JoinColumn(name ="idAddrState")
+    private AddrState addrState;
+
     private Boolean status;
+
 
 }

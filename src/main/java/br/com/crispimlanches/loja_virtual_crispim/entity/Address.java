@@ -1,4 +1,4 @@
-package entity;
+package br.com.crispimlanches.loja_virtual_crispim.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -21,7 +21,7 @@ public class Address extends Auditable {
     private String district;
     @ManyToOne
     private City city;
-    private String zipCode;
+    private String postCode;
     @ManyToOne
     private User user;
 

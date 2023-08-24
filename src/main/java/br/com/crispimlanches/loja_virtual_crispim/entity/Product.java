@@ -1,4 +1,4 @@
-package entity;
+package br.com.crispimlanches.loja_virtual_crispim.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -20,6 +20,6 @@ public class Product {
     private ProductBrand brand;
     @ManyToOne
     @JoinColumn(name = "categoryId")
-    private ProductCategory category;
+    private Category category;
     private Boolean status;
 }

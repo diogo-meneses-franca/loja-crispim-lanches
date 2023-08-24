@@ -17,7 +17,7 @@ public class Product {
     private BigDecimal saleValue;
     @ManyToOne
     @JoinColumn(name = "brandId")
-    private ProductBrand brand;
+    private Brand brand;
     @ManyToOne
     @JoinColumn(name = "categoryId")
     private Category category;

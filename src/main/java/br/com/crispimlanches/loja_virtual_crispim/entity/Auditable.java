@@ -15,11 +15,11 @@ import java.util.Date;
 public class Auditable {
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "create_date", nullable = false)
+    @Column(name = "create_date")
     @CreationTimestamp
     private Date createDate;
 
-    @Column(name = "update_date", nullable = false)
+    @Column(name = "update_date")
     @Temporal(TemporalType.TIMESTAMP)
     @UpdateTimestamp
     private Date updateDate;

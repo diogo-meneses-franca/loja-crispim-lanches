@@ -20,6 +20,6 @@ public class Product {
     private ProductBrand brand;
     @ManyToOne
     @JoinColumn(name = "categoryId")
-    private ProductCategory category;
+    private Category category;
     private Boolean status;
 }

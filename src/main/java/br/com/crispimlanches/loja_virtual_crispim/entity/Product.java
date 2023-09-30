@@ -1,4 +1,4 @@
-package entity;
+package br.com.crispimlanches.loja_virtual_crispim.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -17,9 +17,9 @@ public class Product {
     private BigDecimal saleValue;
     @ManyToOne
     @JoinColumn(name = "brandId")
-    private ProductBrand brand;
+    private Brand brand;
     @ManyToOne
     @JoinColumn(name = "categoryId")
-    private ProductCategory category;
+    private Category category;
     private Boolean status;
 }

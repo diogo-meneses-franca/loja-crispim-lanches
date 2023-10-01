@@ -24,11 +24,4 @@ public class Auditable {
     @UpdateTimestamp
     private Date updateDate;
 
-    public void onCreate(){
-        this.createDate = new Date();
-    }
-
-    public void onUpdate(){
-        this.updateDate = new Date();
-    }
 }

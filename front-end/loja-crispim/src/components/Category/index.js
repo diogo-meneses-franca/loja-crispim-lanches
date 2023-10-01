@@ -144,12 +144,12 @@ const Category = () => {
                 <DataTable value={categoryPage}
                     paginator
                     rows={5}
-                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    rowsPerPageOptions={[5, 10, 20]}
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
                     tableStyle={{
-                        maxWidth: '60%',
-                        marginLeft: '20%',
+                        maxWidth: '80%',
+                        marginLeft: '10%',
 
                     }}>
                     <Column field="name" header="Nome" sortable></Column>

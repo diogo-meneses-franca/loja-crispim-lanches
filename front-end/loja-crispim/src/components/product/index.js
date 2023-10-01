@@ -6,7 +6,6 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
-import { Carousel } from 'primereact/carousel';np,
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
@@ -76,14 +75,13 @@ const Product = () => {
 
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
-            productService.delete(data.id);
+            productService.delete(data.id).then(()=>requestProduct(paginationModel));
 
         } else {
             let prod = data;
             prod.status = true;
-            productService.update(prod);
+            productService.update(prod).then(()=>requestProduct(paginationModel));
         }
-        requestProduct(paginationModel);
     }
 
     const handleEditButtonClick = (productId) => {
@@ -100,6 +98,18 @@ const Product = () => {
             month: '2-digit',
             year: 'numeric'
         });
+    };
+
+    const formatCurrency = (value) => {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    };
+
+    const costValueBodyTemplate = (product) => {
+        return formatCurrency(product.costValue);
+    };
+
+    const saleValueBodyTemplate = (product) => {
+        return formatCurrency(product.saleValue);
     };
 
     const createDateBodyTemplate = (rowData) => {
@@ -127,14 +137,10 @@ const Product = () => {
             <InputSwitch checked={rowData.status} onChange={() => onDataStatusChangeClick(rowData)} />
         );
     };
-    const imageBodyTemplate = ()=>{
-        return (
 
-            <div className="card">
-            <Carousel value={products} numScroll={1} numVisible={3} responsiveOptions={responsiveOptions} itemTemplate={productTemplate} />
-        </div>
-        )
-    }
+    const imageBodyTemplate = (product) => {
+        return <img src={product.images[0].url} className="product-image" onClick={()=> setOpen(true)}/>;
+    };
     return (
         <div className="product-view">
             <div>
@@ -155,18 +161,20 @@ const Product = () => {
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
                     tableStyle={{
-                        maxWidth: '60%',
-                        marginLeft: '20%',
+                        maxWidth: '80%',
+                        marginLeft: '10%',
 
                     }}>
-                    <Column field="name" header="Nome" sortable></Column>
-                    <Column header="Image" body={imageBodyTemplate}></Column>
-                    <Column field="name" header="Nome" sortable></Column>
-                    <Column field="name" header="Nome" sortable></Column>
-                    <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '12%' }} align={"left"}></Column>
-                    <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '13%' }} align={"left"}></Column>
-                    <Column body={editProductTemplate} header="Editar" style={{ width: '8%' }} align={"right"} />
-                    <Column body={activeProductTemplate} header="Ativa/Inativar" style={{ width: '15%' }} align={"center"} />
+                    <Column field="name" header="Nome" sortable style={{ width: '15%' }}></Column>
+                    <Column field="images[0]" header="Imagem" body={imageBodyTemplate}></Column>
+                    <Column field="costValue" body={costValueBodyTemplate} header="custo" sortable style={{ width: '7%' }}></Column>
+                    <Column field="saleValue" body={saleValueBodyTemplate} header="venda" sortable style={{ width: '7%' }}></Column>
+                    <Column field="category.name" header="Categoria" sortable style={{ width: '8%' }}></Column>
+                    <Column field="brand.name" header="Marca" sortable style={{ width: '8%' }}></Column>
+                    <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '9%' }} align={"left"}></Column>
+                    <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '10%' }} align={"left"}></Column>
+                    <Column body={editProductTemplate} header="Editar" style={{ width: '5%' }} align={"center"} />
+                    <Column body={activeProductTemplate} header="Ativa/Inativar" style={{ width: '5%' }} align={"center"} />
                 </DataTable>
             </div>
         </div>

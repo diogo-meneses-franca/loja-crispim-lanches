@@ -1,5 +1,5 @@
-.p-button{
-    margin-left: 20%;
+button.p-button{
+    margin-left: 10%;
     margin-bottom: 10px;
 }
 .product-view{
@@ -13,7 +13,11 @@
 
 }
 
-.dialog-button{
+button.dialog-button{
     margin-top: 20px;
-    margin-left: 89%;
+    margin-left: 88%;
+}
+.product-image{
+    width: 6rem;
+    border-radius: 5%;
 }

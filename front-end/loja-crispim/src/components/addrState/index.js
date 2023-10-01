@@ -75,14 +75,15 @@ const AddrState = () => {
 
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
-            addrStateService.delete(data.id);
+            addrStateService.delete(data.id)
+            .then(()=>requestAddrState(paginationModel));
 
         } else {
             let addresState = data;
             addresState.status = true;
-            addrStateService.update(addresState);
+            addrStateService.update(addresState)
+            .then(()=>requestAddrState(paginationModel));
         }
-        requestAddrState(paginationModel);
     }
 
     const handleEditButtonClick = (addrStateId) => {
@@ -150,8 +151,8 @@ const AddrState = () => {
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
                     tableStyle={{
-                        maxWidth: '60%',
-                        marginLeft: '20%',
+                        maxWidth: '80%',
+                        marginLeft: '10%',
 
                     }}>
                     <Column field="name" header="Nome" sortable></Column>

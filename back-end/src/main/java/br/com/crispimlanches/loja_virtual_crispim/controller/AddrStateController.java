@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/addrState")
+@CrossOrigin
 public class AddrStateController {
     private AddrStateService addrStateService;
 

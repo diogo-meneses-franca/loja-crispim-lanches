@@ -74,14 +74,15 @@ const Brand = () => {
 
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
-            brandService.delete(data.id);
+            brandService.delete(data.id)
+            .then(()=>requestBrand(paginationModel));
 
         } else {
             let brd = data;
             brd.status = true;
-            brandService.update(brd);
+            brandService.update(brd)
+            .then(()=>requestBrand(paginationModel));
         }
-        requestBrand(paginationModel);
     }
 
     const handleEditButtonClick = (brandId) => {
@@ -146,8 +147,8 @@ const Brand = () => {
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
                     tableStyle={{
-                        maxWidth: '60%',
-                        marginLeft: '20%',
+                        maxWidth: '80%',
+                        marginLeft: '10%',
 
                     }}>
                     <Column field="name" header="Nome" sortable></Column>

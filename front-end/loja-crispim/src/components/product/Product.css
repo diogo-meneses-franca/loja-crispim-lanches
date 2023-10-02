@@ -1,4 +1,7 @@
-button.p-button{
+.p-button{
+    margin-left: 0;
+}
+.p-button.form-button{
     margin-left: 10%;
     margin-bottom: 10px;
 }
@@ -13,11 +16,18 @@ button.p-button{
 
 }
 
-button.dialog-button{
-    margin-top: 20px;
-    margin-left: 88%;
+.p-button.p-button-success, .p-buttonset.p-button-success > .p-button, .p-splitbutton.p-button-success > .p-button, .p-fileupload-choose.p-button-success{
+    margin-left: 89%;
+    display: block;
+    position: static;
+    margin-top: 10px;
 }
+
 .product-image{
     width: 6rem;
     border-radius: 5%;
+}
+
+.p-fileupload .p-fileupload-buttonbar .p-button {
+    margin-left: 0;
 }

@@ -1,27 +1,21 @@
 import React from 'react';
+import { BrowserRouter } from "react-router-dom";
+import '/node_modules/primeflex/primeflex.css';
 import MyAppBar from "./components/MyAppBar";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from './components/Home'
-import Category from './components/Category';
-import Brand from './components/brand';
-import Product from './components/product';
 import AdministrativePanel from './components/administrativePanel';
-import AddrState from './components/addrState';
-
+import Navigation from './components/navigation';
 
 function App() {
   return (
     <>
       <BrowserRouter>
-        <MyAppBar/>
-          <Routes>
-              <Route exact path="/" Component={Home} />
-                <Route path="/category" Component={Category} />
-                <Route path="/brand" Component={Brand} />
-                <Route path="/product" Component={Product} />
-                <Route path="/addrState" Component={AddrState} />
-          </Routes>
-                
+        <div class='card h-screen surface-ground '>
+          <MyAppBar />
+          <div class="flex card-container mt-5">
+            <AdministrativePanel />
+            <Navigation />
+          </div>
+        </div>
       </BrowserRouter>
     </>
   );

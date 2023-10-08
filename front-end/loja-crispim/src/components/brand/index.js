@@ -9,7 +9,6 @@ import { InputSwitch } from "primereact/inputswitch";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
-import './Brand.css';
 
 const Brand = () => {
     const [open, setOpen] = useState(false);
@@ -75,13 +74,13 @@ const Brand = () => {
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
             brandService.delete(data.id)
-            .then(()=>requestBrand(paginationModel));
+                .then(() => requestBrand(paginationModel));
 
         } else {
             let brd = data;
             brd.status = true;
             brandService.update(brd)
-            .then(()=>requestBrand(paginationModel));
+                .then(() => requestBrand(paginationModel));
         }
     }
 
@@ -128,18 +127,22 @@ const Brand = () => {
     };
 
     return (
-        <div className="brand-view">
-            <div>
-                <Button label="Cadastrar" onClick={() => setOpen(true)} />
+        <div class="w-full">
+            <div class="m-3 mb-1">
+                <Button className="form-button bg-blue-400" label="Cadastrar" onClick={() => setOpen(true)} />
             </div>
             <div className="card flex justify-content-center">
-                <Dialog header={editMode ? "Editar Marca" : "Cadastrar Marca"} visible={open} onHide={handleDialogClose}
-                    style={{ width: '50vw' }}>
-                    <InputText value={brand.name} onChange={handleChange} placeholder="Ex: Coca-Cola" />
-                    <Button className="dialog-button" severity="success" label="Confirmar" size="small" onClick={onSave} />
+                <Dialog className="flex ml-8 w-8 " header={editMode ? "Editar Marca" : "Cadastrar Marca"} visible={open} onHide={handleDialogClose}>
+                    <form>
+                        <label className="mb-6" htmlFor="name">Nome</label>
+                        <InputText className="flex w-full mb-2" value={brand.name} onChange={handleChange} placeholder="Ex: Coca-Cola" required={true} />
+                        <div className="align-items-end w-full h-5rem">
+                            <Button className="flex-1" severity="success" label="Confirmar" size="small" onClick={onSave} />
+                        </div>
+                    </form>
                 </Dialog>
             </div>
-            <div className="card">
+            <div class="m-3">
                 <DataTable value={brandPage}
                     paginator
                     rows={5}
@@ -147,8 +150,8 @@ const Brand = () => {
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
                     tableStyle={{
-                        maxWidth: '80%',
-                        marginLeft: '10%',
+                        maxWidth: '100%',
+                        position: 'relative',
 
                     }}>
                     <Column field="name" header="Nome" sortable></Column>

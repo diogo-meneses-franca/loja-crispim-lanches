@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ProductService } from "../../service/ProductService";
+import { BrandService } from "../../service/BrandService";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -7,20 +8,22 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { FileUpload } from 'primereact/fileupload';
-import { ImageCompressor } from 'image-compressor';
-import AWS from 'aws-sdk';
+import { MultiSelect } from 'primereact/multiselect';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
-import './Product.css';
 
 const Product = () => {
     const [open, setOpen] = useState(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 });
     const [productPage, setProductPage] = useState([]);
     const [editMode, setEditMode] = useState(false)
-    const [product, setProduct] = useState({ name: '', description: '', costValue: '', saleValue: '', images: [], category: {}, brand: {} })
+    const [product, setProduct] = useState({ name: '', description: '', costValue: '', saleValue: '', brand: {} })
+    const [temporaryImages, setTemporaryImages] = useState([]);
+    const [brand, setBrand] = useState([])
+    const [selectedBrand, setSelectedBrand] = useState({})
     const productService = new ProductService();
+    const brandService = new BrandService();
 
     useEffect(() => {
         requestProduct(paginationModel);
@@ -33,11 +36,11 @@ const Product = () => {
     const handleDialogClose = () => {
         setOpen(false);
         setEditMode(false);
-        setProduct({ name: "" })
+        setProduct({ name: '', description: '', costValue: '', saleValue: '', brand: {} });
     };
 
     const handleChange = (event) => {
-        const {name, value} = event.target;
+        const { name, value } = event.target;
         setProduct({ ...product, [name]: value });
     }
 
@@ -45,12 +48,12 @@ const Product = () => {
         productService.get(pagination.page, pagination.pageSize)
             .then((response) => response.json())
             .then((data) => {
-                console.log(data.content)
                 setProductPage(data.content)
             })
     }
 
-    const onSave = (event) => {
+    const onSave = async (event) => {
+        const productImages = []
         event.preventDefault();
         if (product.name.trim() === '') {
             return;
@@ -61,40 +64,65 @@ const Product = () => {
                     if (response.status === 200) {
                         requestProduct(paginationModel);
                         setEditMode(false);
-                        setProduct({ name: '' })
+                        setProduct({ name: '', description: '', costValue: '', saleValue: '' });
                     }
                 })
         } else {
-            productService.post(product)
+            const uploadPromises = temporaryImages.map(async (image) => {
+                const url = await productService.getPresignedAwsUrl();
+                const response = await productService.sendImageToAwsS3(url, image);
+                if (response.status === 200) {
+                    productImages.push({ "url": url.split('?')[0] });
+                }
+            });
+
+            await Promise.all(uploadPromises);
+            const updatedProduct = { ...product, images: productImages };;
+            productService.post(updatedProduct)
                 .then((response) => {
                     if (response.status === 201) {
                         requestProduct(paginationModel);
                     }
-                    setProduct({ name: '' });
+                    setProduct({ name: '', description: '', costValue: '', saleValue: '', images: [] });
                 })
-
         }
         handleDialogClose();
-    };
+    }
 
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
-            productService.delete(data.id).then(()=>requestProduct(paginationModel));
+            productService.delete(data.id).then(() => requestProduct(paginationModel));
 
         } else {
             let prod = data;
             prod.status = true;
-            productService.update(prod).then(()=>requestProduct(paginationModel));
+            productService.update(prod).then(() => requestProduct(paginationModel));
         }
     }
 
     const handleEditButtonClick = (productId) => {
+        getBrandWhenDialogOpen();
         const selectedProduct = (productPage.find((product) => product.id === productId));
-        setProduct({ id: selectedProduct.id, name: selectedProduct.name })
+        setProduct({ id: selectedProduct.id, name: selectedProduct.name, brand: selectedProduct.brand })
         setEditMode(true);
         setOpen(true);
     };
 
+    const getBrandWhenDialogOpen = () => {
+        return brandService.get()
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data.content);
+                setBrand(data.content);
+            })
+    }
+
+    const handleOpenDialog = () => {
+        getBrandWhenDialogOpen();
+        setOpen(true);
+    }
+
+    /*
     const formatDate = (value) => {
         const dt = new Date(value)
         return dt.toLocaleDateString('pt-BR', {
@@ -103,7 +131,7 @@ const Product = () => {
             year: 'numeric'
         });
     };
-
+    */
     const formatCurrency = (value) => {
         return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
@@ -115,24 +143,23 @@ const Product = () => {
     const saleValueBodyTemplate = (product) => {
         return formatCurrency(product.saleValue);
     };
-
+    /*
     const createDateBodyTemplate = (rowData) => {
         return formatDate(rowData.createDate);
     };
     const updateDateBodyTemplate = (rowData) => {
         return formatDate(rowData.updateDate);
-    };
+    };*/
     const editProductTemplate = (rowData) => {
         return (
-            <div>
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    text
-                    onClick={() => handleEditButtonClick(rowData.id)}
-                    severity="secondary"
-                />
-            </div>
+            <Button
+                className="edit-button"
+                icon="pi pi-pencil"
+                rounded
+                text
+                onClick={() => handleEditButtonClick(rowData.id)}
+                severity="secondary"
+            />
         )
     }
 
@@ -143,70 +170,45 @@ const Product = () => {
     };
 
     const imageBodyTemplate = (product) => {
-        return <img src={product.images[0].url} className="product-image" onClick={()=> setOpen(true)}/>;
+        return <img src={product.images[0]?.url} className="product-image" onClick={() => setOpen(true)} />;
     };
 
-    AWS.config.update({
-        accessKeyId: 'chave',
-        secretAccessKey: 'senha'
-    });
-
-    const s3 = new AWS.S3();
-
-    const handleFileUpload = async (event) => {
-        console.log(event.file.name)
-        const files = event.files;
-        console.log(files)
-        if(!files || files.length === 0) return;
-
-        for(const file of files){
-            try{
-                const compressedImage = await new ImageCompressor(file, {quality: 0.6}).compress();
-                const fileName = `uploads/${Date.now()}-${compressedImage.name}`;
-
-                const params = {
-                    Bucket: 'loja-crispim' ,
-                    key: fileName,
-                    Body: compressedImage
-                }
-                await s3.upload(params).promise();
-                const imageUrl = `http://loja-crispim.s3.amazonaws.com/${fileName}`
-
-                console.log("Uploaded image:", imageUrl);
-            }catch(error){
-                console.log('Error uploading image: ', error);
-            }
-        }
-
+    const handleFakeImgUpload = (event) => {
+        setTemporaryImages(event.files)
     }
-    const handleUploadResponse = (response) => {
-        if (response.success) {
-          console.log('Image uploaded successfully:', response.fileName);
-          // Handle success, e.g., update your UI or store the S3 URL
-        } else {
-          console.error('Image upload failed:', response.error);
-          // Handle the error, e.g., display an error message to the user
-        }
-      };
+
+    /*
+    <Column field="category.name" header="Categoria" sortable style={{ width: '8%' }}></Column>
+                    <Column field="brand.name" header="Marca" sortable style={{ width: '8%' }}></Column>
+                    */
     return (
         <div className="product-view">
             <div>
-                <Button className="form-button" label="Cadastrar" onClick={() => setOpen(true)} />
+                <Button
+                    className="form-button"
+                    label="Cadastrar"
+                    onClick={() => {
+
+                        handleOpenDialog();
+                    }} />
             </div>
             <div className="card flex justify-content-center">
                 <Dialog header={editMode ? "Editar Produto" : "Cadastrar Produto"} visible={open} onHide={handleDialogClose}
                     style={{ width: '50vw' }}>
                     <form >
-                        <label htmlFor="name">Nome</label>
+                        <label name="name">Nome</label>
                         <InputText name="name" value={product.name} onChange={handleChange} placeholder="Ex: Coca-Cola" required={true} />
-                        <label htmlFor="description">Descrição</label>
+                        <label name="description">Descrição</label>
                         <InputText name="description" value={product.description} onChange={handleChange} placeholder="Ex: Coca-Cola" required={false} />
-                        <label htmlFor="costPrice">Preço de custo</label>
+                        <MultiSelect value={product.brand} onChange={(e) => setProduct({ ...product, brand: e.value })} options={brand} optionLabel="name"
+                            placeholder="Marca" maxSelectedLabels={1} className="w-full md:w-20rem" />
+                        <label name="costPrice">Preço de custo</label>
                         <InputText name="costValue" value={product.costValue} onChange={handleChange} required={true} />
-                        <label htmlFor="salePrice">Preço de venda</label>
-                        <InputText value={product.saleValue} name="saleValue" onChange={handleChange} required={true}/>
-                        <FileUpload className="file-sender" customUpload={handleFileUpload} onUpload={handleUploadResponse} name="images" multiple accept="image/*" maxFileSize={1000000} emptyTemplate={<p className="m-0">Arraste e solte as imagens aqui.</p>} />
-                        <Button severity="success" label="Confirmar" size="small" onSubmit={onSave} />
+                        <label name="salePrice">Preço de venda</label>
+                        <InputText value={product.saleValue} name="saleValue" onChange={handleChange} required={true} />
+
+                        <FileUpload value={product.images} previewWidth={30} name="images" url={"#"} accept="image/*" maxFileSize={1000000} multiple customUpload uploadHandler={handleFakeImgUpload} emptyTemplate={<p className="m-0">Arraste e solte as imagens aqui.</p>} />
+                        <Button name="confirmar" severity="success" label="Confirmar" size="small" onClick={onSave} />
                     </form>
                 </Dialog>
             </div>
@@ -218,21 +220,17 @@ const Product = () => {
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
                     tableStyle={{
-                        maxWidth: '80%',
+                        maxWidth: '60%',
                         marginLeft: '10%',
 
                     }}>
+                    <Column field="images[0]?.url" header="Imagem" body={imageBodyTemplate} align={"center"}></Column>
                     <Column field="name" header="Nome" sortable style={{ width: '15%' }}></Column>
-                    <Column field="images[0]" header="Imagem" body={imageBodyTemplate}></Column>
                     <Column field="description" header="Descrição"></Column>
                     <Column field="costValue" body={costValueBodyTemplate} header="custo" sortable style={{ width: '7%' }}></Column>
                     <Column field="saleValue" body={saleValueBodyTemplate} header="venda" sortable style={{ width: '7%' }}></Column>
-                    <Column field="category.name" header="Categoria" sortable style={{ width: '8%' }}></Column>
-                    <Column field="brand.name" header="Marca" sortable style={{ width: '8%' }}></Column>
-                    <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '9%' }} align={"left"}></Column>
-                    <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '10%' }} align={"left"}></Column>
-                    <Column body={editProductTemplate} header="Editar" style={{ width: '5%' }} align={"center"} />
-                    <Column body={activeProductTemplate} header="Ativa/Inativar" style={{ width: '5%' }} align={"center"} />
+                    <Column body={editProductTemplate} header="Editar" style={{ width: '8%' }} align={"center"} />
+                    <Column body={activeProductTemplate} header="Ativa/Inativar" style={{ width: '8%' }} align={"center"} />
                 </DataTable>
             </div>
         </div>

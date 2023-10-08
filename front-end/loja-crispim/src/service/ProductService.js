@@ -41,5 +41,25 @@ export class ProductService {
         });
     }
 
+    getPresignedAwsUrl(){
+        return fetch(`${process.env.REACT_APP_URL_API}/presignedUrl`,
+            {
+                method: "GET"
+            })
+            .then((response)=>response.json())
+            .then((data)=>data)
+
+    }
+
+    sendImageToAwsS3(url, image){
+        return fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "image/jpeg"
+            },
+            body: image
+        })
+    }
+
 
 }

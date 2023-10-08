@@ -1,33 +1,24 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import { Toolbar } from 'primereact/toolbar';
+import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
 
-
-
-const  MyAppBar = ()=> {
+const MyAppBar = () => {
   const navigate = useNavigate();
-  const loadPage = (page)=>{
-    navigate(page);
-  }
+    const loadPage = (page) => {
+        navigate(page);
+    }
+
+  const startContent = (
+    <React.Fragment>
+        <Button label="Home"  className=" relative m-3 bg-blue-400 border-transparent" onClick={()=> loadPage('/')}/>
+    </React.Fragment>
+);
+
   return (
-    <div>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <Button color="inherit" onClick={()=>loadPage('/category')}>Categoria</Button>
-            <Button color="inherit" onClick={()=>loadPage('/brand')}>Marca</Button>
-            <Button color="inherit" onClick={()=>loadPage('/product')}>Produto</Button>
-            <Button color="inherit" onClick={()=>loadPage('/addrState')}>Estado</Button>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}/>
-            <Button color="inherit">Login</Button>
-          </Toolbar>
-        </AppBar>
-      </Box>
-    </div>
+    
+      <Toolbar class=" bg-blue-400 h-5rem" start={startContent} />
+
   );
 }
 export default MyAppBar;

@@ -1,59 +1,23 @@
 import React from "react";
-import Divider from '@mui/material/Divider';
-import Paper from '@mui/material/Paper';
-import MenuList from '@mui/material/MenuList';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Typography from '@mui/material/Typography';
-import ContentCut from '@mui/icons-material/ContentCut';
-import ContentCopy from '@mui/icons-material/ContentCopy';
-import ContentPaste from '@mui/icons-material/ContentPaste';
-import Cloud from '@mui/icons-material/Cloud';
-import './AdministrativePanel.css';
+import { Button } from 'primereact/button';
+import { useNavigate } from 'react-router-dom';
+
 
 const AdministrativePanel = () => {
+    const navigate = useNavigate();
+    const loadPage = (page) => {
+        navigate(page);
+    }
     return (
-    <>
-        <Paper sx={{ width: 320, maxWidth: '100%' }}>
-            <MenuList>
-                <MenuItem>
-                    <ListItemIcon>
-                        <ContentCut fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Cut</ListItemText>
-                    <Typography variant="body2" color="text.secondary">
-                        ⌘X
-                    </Typography>
-                </MenuItem>
-                <MenuItem>
-                    <ListItemIcon>
-                        <ContentCopy fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Copy</ListItemText>
-                    <Typography variant="body2" color="text.secondary">
-                        ⌘C
-                    </Typography>
-                </MenuItem>
-                <MenuItem>
-                    <ListItemIcon>
-                        <ContentPaste fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Paste</ListItemText>
-                    <Typography variant="body2" color="text.secondary">
-                        ⌘V
-                    </Typography>
-                </MenuItem>
-                <Divider />
-                <MenuItem>
-                    <ListItemIcon>
-                        <Cloud fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Web Clipboard</ListItemText>
-                </MenuItem>
-            </MenuList>
-        </Paper>
-    </>
+        <div className="card h-15rem w-2 m-3 mt-8 align-items-baseline border-1 surface-border border-round-lg bg-white">
+            <div class=" flex flex-wrap justify-content-center border-round-xs ">
+                <Button class="inline-block w-full h-3rem  border-transparent border-noround-bottom border-right-none text-lg border-round-top border-round-lg border-left-none text-white bg-blue-400 " onClick={() => { }}>Opções</Button>
+                <Button class="inline-block w-full h-3rem  border-noround-bottom border-right-none text-lg bg-white border-bottom-1 border-50 border-left-none" onClick={() => loadPage('/category') }>Categoria</Button>
+                <Button class="inline-block w-full h-3rem  border-noround-bottom border-right-none text-lg bg-white border-bottom-1 border-50 border-left-none" onClick={() => loadPage('/brand')}>Marca</Button>
+                <Button class="inline-block w-full h-3rem  border-noround-bottom border-right-none text-lg bg-white border-bottom-1 border-50 border-left-none" onClick={() => loadPage('/product')}>Produto</Button>
+                <Button class="inline-block w-full h-3rem  text-lg border-right-none bg-white border-bottom-1 border-50 border-round-bottom border-left-none"   onClick={() => loadPage('/addrState')}>Estado</Button>
+            </div>
+        </div>
     );
 
 

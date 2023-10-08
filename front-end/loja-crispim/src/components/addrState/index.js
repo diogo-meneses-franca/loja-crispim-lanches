@@ -9,7 +9,6 @@ import { InputSwitch } from "primereact/inputswitch";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
-import './AddrState.css';
 
 const AddrState = () => {
     const [open, setOpen] = useState(false);
@@ -131,7 +130,7 @@ const AddrState = () => {
     return (
         <div className="addrState-view">
             <div>
-                <Button label="Cadastrar" onClick={() => setOpen(true)} />
+                <Button className="form-button" label="Cadastrar" onClick={() => setOpen(true)} />
             </div>
             <div className="card flex justify-content-center">
                 <Dialog header={editMode ? "Editar Estado" : "Cadastrar Estado"} visible={open} onHide={handleDialogClose}

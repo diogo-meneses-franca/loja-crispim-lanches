@@ -9,6 +9,7 @@ import { InputSwitch } from "primereact/inputswitch";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
+import '../universal.css'
 
 const Brand = () => {
     const [open, setOpen] = useState(false);
@@ -126,24 +127,29 @@ const Brand = () => {
         );
     };
 
+    const header = (
+        <div className="flex flex-wrap align-items-center justify-content-between gap-2">
+            <span className="text-xl text-900 font-bold">Marca</span>
+                <Button className="form-button bg-blue-400 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+        </div>
+    );
+
     return (
-        <div class="w-full">
-            <div class="m-3 mb-1">
-                <Button className="form-button bg-blue-400" label="Cadastrar" onClick={() => setOpen(true)} />
-            </div>
+        <div className="w-full">
             <div className="card flex justify-content-center">
-                <Dialog className="flex ml-8 w-8 " header={editMode ? "Editar Marca" : "Cadastrar Marca"} visible={open} onHide={handleDialogClose}>
-                    <form>
+                <Dialog className="flex ml-8 w-8 h-15rem " header={editMode ? "Editar Marca" : "Cadastrar Marca"} visible={open} onHide={handleDialogClose}>
+                    <form onSubmit={onSave}>
                         <label className="mb-6" htmlFor="name">Nome</label>
                         <InputText className="flex w-full mb-2" value={brand.name} onChange={handleChange} placeholder="Ex: Coca-Cola" required={true} />
-                        <div className="align-items-end w-full h-5rem">
-                            <Button className="flex-1" severity="success" label="Confirmar" size="small" onClick={onSave} />
-                        </div>
+                        <Button className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button " severity="success" label="Confirmar" size="small" />
                     </form>
                 </Dialog>
             </div>
-            <div class="m-3">
-                <DataTable value={brandPage}
+            <div className="m-3">
+                <DataTable 
+                    className="mt-8"
+                    value={brandPage}
+                    header={header}
                     paginator
                     rows={5}
                     rowsPerPageOptions={[5, 10, 25, 50]}

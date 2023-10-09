@@ -1,0 +1,8 @@
+
+.p-inputswitch.p-inputswitch-checked .p-inputswitch-slider{
+    background-color:  #609AF8;
+}
+
+.p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider{
+    background: #609AF8;
+}

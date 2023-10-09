@@ -9,6 +9,7 @@ import { InputSwitch } from "primereact/inputswitch";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
+import '../universal.css'
 
 const Category = () => {
     const [open, setOpen] = useState(false);
@@ -127,33 +128,51 @@ const Category = () => {
         );
     };
 
-    return (
-        <>
-            <Button className="form-button" label="Cadastrar" onClick={() => setOpen(true)} />
-            <Dialog header={editMode ? "Editar Categoria" : "Cadastrar Categoria"} visible={open} onHide={handleDialogClose}
-                style={{ width: '50vw' }}>
-                <InputText value={category.name} onChange={handleChange} placeholder="Ex: Alimentos" />
-                <Button className="dialog-button" severity="success" label="Confirmar" size="small" onClick={onSave} />
-            </Dialog>
-            <DataTable
-                value={categoryPage}
-                paginator
-                rows={5}
-                rowsPerPageOptions={[5, 10, 20]}
-                paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                currentPageReportTemplate="{first} to {last} of {totalRecords}"
-                tableStyle={{
-                    maxWidth: '80%',
-                    marginLeft: '10%',
+    const header = (
+        <div className="flex flex-wrap align-items-center justify-content-between gap-2">
+            <span className="text-xl text-900 font-bold">Categoria</span>
+                <Button className="form-button bg-blue-400 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+        </div>
+    );
 
-                }}>
-                <Column field="name" header="Nome" sortable></Column>
-                <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '12%' }} align={"left"}></Column>
-                <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '13%' }} align={"left"}></Column>
-                <Column body={editCategoryTemplate} header="Editar" style={{ width: '8%' }} align={"right"} />
-                <Column body={activeCategoryTemplate} header="Ativa/Inativar" style={{ width: '15%' }} align={"center"} />
-            </DataTable>
-        </>
+    return (
+        <div className="w-full">
+            <div className="card flex justify-content-center">
+                <Dialog
+                    className="flex ml-8 w-8 h-15rem "
+                    header={editMode ? "Editar Categoria" : "Cadastrar Categoria"}
+                    visible={open}
+                    onHide={handleDialogClose}
+                    style={{ width: '50vw' }
+                    }>
+                    <form onSubmit={onSave}>
+                        <label className="mb-6" htmlFor="name">Nome</label>
+                        <InputText className="flex w-full mb-2" value={category.name} onChange={handleChange} placeholder="Ex: Alimentos" />
+                        <Button className="absolute mb-5 mr-4 mt-3 bottom-0 right-0 dialog-button " severity="success" label="Confirmar" size="small" />
+                    </form>
+                </Dialog>
+            </div>
+            <div className="m-3">
+                <DataTable
+                    className="mt-8"
+                    header={header}
+                    value={categoryPage}
+                    paginator
+                    rows={5}
+                    rowsPerPageOptions={[5, 10, 20]}
+                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                    currentPageReportTemplate="{first} to {last} of {totalRecords}"
+                    tableStyle={{
+                        maxWidth: '100%',
+                    }}>
+                    <Column field="name" header="Nome" sortable></Column>
+                    <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '12%' }} align={"left"}></Column>
+                    <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '13%' }} align={"left"}></Column>
+                    <Column body={editCategoryTemplate} header="Editar" style={{ width: '8%' }} align={"right"} />
+                    <Column body={activeCategoryTemplate} header="Ativa/Inativar" style={{ width: '15%' }} align={"center"} />
+                </DataTable>
+            </div>
+        </div>
     )
 }
 export default Category;

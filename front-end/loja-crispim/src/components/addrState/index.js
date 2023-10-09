@@ -9,6 +9,7 @@ import { InputSwitch } from "primereact/inputswitch";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
+import '../universal.css'
 
 const AddrState = () => {
     const [open, setOpen] = useState(false);
@@ -33,8 +34,8 @@ const AddrState = () => {
     };
 
     const handleChange = (event) => {
-        const {name, value} = event.target
-        setAddrState({ ...addrState, [name]: value});
+        const { name, value } = event.target
+        setAddrState({ ...addrState, [name]: value });
     }
 
     const requestAddrState = (pagination) => {
@@ -75,13 +76,13 @@ const AddrState = () => {
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
             addrStateService.delete(data.id)
-            .then(()=>requestAddrState(paginationModel));
+                .then(() => requestAddrState(paginationModel));
 
         } else {
             let addresState = data;
             addresState.status = true;
             addrStateService.update(addresState)
-            .then(()=>requestAddrState(paginationModel));
+                .then(() => requestAddrState(paginationModel));
         }
     }
 
@@ -126,32 +127,44 @@ const AddrState = () => {
             <InputSwitch checked={rowData.status} onChange={() => onDataStatusChangeClick(rowData)} />
         );
     };
+    const header = (
+        <div className="flex flex-wrap align-items-center justify-content-between gap-2">
+            <span className="text-xl text-900 font-bold">Estado</span>
+            <Button className="form-button bg-blue-400 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+        </div>
+    );
 
     return (
-        <div className="addrState-view">
-            <div>
-                <Button className="form-button" label="Cadastrar" onClick={() => setOpen(true)} />
-            </div>
+        <div className="w-full">
             <div className="card flex justify-content-center">
-                <Dialog header={editMode ? "Editar Estado" : "Cadastrar Estado"} visible={open} onHide={handleDialogClose}
-                    style={{ width: '50vw' }}>
-                    <label htmlFor="name">Nome</label>
-                    <InputText name="name" value={addrState.name} onChange={handleChange} placeholder="Ex: Paraná" required={true} />
-                    <label htmlFor="acronym">Sigla</label>
-                    <InputText name="acronym" value={addrState.acronym} onChange={handleChange} placeholder="Ex: PR" required={true} />
-                    <Button className="dialog-button" severity="success" label="Confirmar" size="small" onClick={onSave} />
+                <Dialog
+                    className="flex ml-8 w-8 h-20rem "
+                    header={editMode ? "Editar Estado" : "Cadastrar Estado"}
+                    visible={open} onHide={handleDialogClose}
+                    style={{ width: '50vw' }
+                    }>
+                    <form onSubmit={onSave}>
+                        <label className="mb-6" htmlFor="name">Nome</label>
+                        <InputText className="flex w-full mb-2" name="name" value={addrState.name} onChange={handleChange} placeholder="Ex: Paraná" required={true} />
+                        <label className="mb-6" htmlFor="acronym">Sigla</label>
+                        <InputText className="flex w-full mb-2" name="acronym" value={addrState.acronym} onChange={handleChange} placeholder="Ex: PR" required={true} />
+                        <Button className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button " severity="success" label="Confirmar" size="small" />
+
+                    </form>
                 </Dialog>
             </div>
-            <div className="card">
-                <DataTable value={addrStatePage}
+            <div className="m-3">
+                <DataTable
+                    className="mt-8"
+                    header={header}
+                    value={addrStatePage}
                     paginator
                     rows={5}
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
                     tableStyle={{
-                        maxWidth: '80%',
-                        marginLeft: '10%',
+                        maxWidth: '100%',
 
                     }}>
                     <Column field="name" header="Nome" sortable></Column>

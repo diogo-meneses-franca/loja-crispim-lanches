@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { AddrStateService } from "../../service/AddrStateService";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -6,6 +6,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
+import { Toast } from 'primereact/toast';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
@@ -16,7 +17,8 @@ const AddrState = () => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 });
     const [addrStatePage, setAddrStatePage] = useState([]);
     const [editMode, setEditMode] = useState(false)
-    const [addrState, setAddrState] = useState({ name: '', acronym: '' })
+    const [addrState, setAddrState] = useState({ name: '', acronym: '', status: true })
+    const toast = useRef(null);
     const addrStateService = new AddrStateService();
 
     useEffect(() => {
@@ -30,7 +32,7 @@ const AddrState = () => {
     const handleDialogClose = () => {
         setOpen(false);
         setEditMode(false);
-        setAddrState({ name: '', acronym: '' })
+        setAddrState({ name: '', acronym: '', status: true })
     };
 
     const handleChange = (event) => {
@@ -52,23 +54,36 @@ const AddrState = () => {
             return;
         }
         if (editMode) {
-            addrStateService.update(addrState)
-                .then((response) => {
-                    if (response.status === 200) {
-                        requestAddrState(paginationModel);
-                        setEditMode(false);
-                        setAddrState({ name: '' })
-                    }
-                })
-        } else {
-            addrStateService.post(addrState)
-                .then((response) => {
-                    if (response.status === 201) {
-                        requestAddrState(paginationModel);
-                    }
-                    setAddrState({ name: '' });
-                })
+            try {
+                addrStateService.update(addrState)
+                    .then((response) => {
+                        if (response.status === 200) {
+                            showSuccess();
+                            requestAddrState(paginationModel);
+                            setEditMode(false);
+                            setAddrState({ name: '', acronym: '', status: true })
+                        }
+                    })
 
+            } catch (error) {
+                showError();
+                console.log(error);
+            }
+        } else {
+            try {
+                addrStateService.post(addrState)
+                    .then((response) => {
+                        if (response.status === 201) {
+                            showSuccess();
+                            requestAddrState(paginationModel);
+                        }
+                        setAddrState({ name: '', acronym: '', status: true });
+                    })
+
+            }catch (error) {
+                showError();
+                console.log(error);
+            }
         }
         handleDialogClose();
     };
@@ -88,7 +103,7 @@ const AddrState = () => {
 
     const handleEditButtonClick = (addrStateId) => {
         const selectedAddrState = (addrStatePage.find((addrState) => addrState.id === addrStateId));
-        setAddrState({ id: selectedAddrState.id, name: selectedAddrState.name, acronym: selectedAddrState.acronym })
+        setAddrState({ id: selectedAddrState.id, name: selectedAddrState.name, acronym: selectedAddrState.acronym, status: selectedAddrState.status })
         setEditMode(true);
         setOpen(true);
     };
@@ -130,12 +145,19 @@ const AddrState = () => {
     const header = (
         <div className="flex flex-wrap align-items-center justify-content-between gap-2">
             <span className="text-xl text-900 font-bold">Estado</span>
-            <Button className="form-button bg-blue-400 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+            <Button className="form-button bg-green-400 hover:bg-green-500 border-transparent mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
         </div>
     );
+    const showSuccess = () => {
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Registro Efetuado com sucesso!', life: 3000 });
+    }
+    const showError = () => {
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'Falha no registro! Tente novamente mais tarde.', life: 3000 });
+    }
 
     return (
         <div className="w-full">
+            <Toast ref={toast} />
             <div className="card flex justify-content-center">
                 <Dialog
                     className="flex ml-8 w-8 h-20rem "
@@ -148,7 +170,7 @@ const AddrState = () => {
                         <InputText className="flex w-full mb-2" name="name" value={addrState.name} onChange={handleChange} placeholder="Ex: Paraná" required={true} />
                         <label className="mb-6" htmlFor="acronym">Sigla</label>
                         <InputText className="flex w-full mb-2" name="acronym" value={addrState.acronym} onChange={handleChange} placeholder="Ex: PR" required={true} />
-                        <Button className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button " severity="success" label="Confirmar" size="small" />
+                        <Button className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-green-400 hover:bg-green-500 border-transparent " severity="success" label="Confirmar" size="small" />
 
                     </form>
                 </Dialog>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { CategoryService } from "../../service/CategoryService";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -6,6 +6,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
+import { Toast } from 'primereact/toast';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
@@ -15,8 +16,9 @@ const Category = () => {
     const [open, setOpen] = useState(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 });
     const [categoryPage, setCategoryPage] = useState([]);
-    const [editMode, setEditMode] = useState(false)
-    const [category, setCategory] = useState({ name: '' })
+    const [editMode, setEditMode] = useState(false);
+    const [category, setCategory] = useState({ name: '', status: true });
+    const toast = useRef(null);
     const categoryService = new CategoryService();
 
     useEffect(() => {
@@ -30,7 +32,7 @@ const Category = () => {
     const handleDialogClose = () => {
         setOpen(false);
         setEditMode(false);
-        setCategory({ name: "" })
+        setCategory({ name: "", status: true });
     };
 
     const handleChange = (event) => {
@@ -51,22 +53,36 @@ const Category = () => {
             return;
         }
         if (editMode) {
-            categoryService.update(category)
-                .then((response) => {
-                    if (response.status === 200) {
-                        requestCategory(paginationModel);
-                        setEditMode(false);
-                        setCategory({ name: '' })
-                    }
-                })
+            try{
+                categoryService.update(category)
+                    .then((response) => {
+                        if (response.status === 200) {
+                            showSuccess();
+                            requestCategory(paginationModel);
+                            setEditMode(false);
+                            setCategory({ name: '', status: true });
+                        }
+                    })
+
+            }catch(error){
+                showError();
+                console.log(error);
+            }
         } else {
-            categoryService.post(category)
-                .then((response) => {
-                    if (response.status === 201) {
-                        requestCategory(paginationModel);
-                    }
-                    setCategory({ name: '' });
-                })
+            try{
+                categoryService.post(category)
+                    .then((response) => {
+                        if (response.status === 201) {
+                            showSuccess();
+                            requestCategory(paginationModel);
+                        }
+                        setCategory({ name: '', status: true });
+                    })
+
+            }catch(error){
+                showError();
+                console.log(error);
+            }
 
         }
         handleDialogClose();
@@ -88,7 +104,7 @@ const Category = () => {
 
     const handleEditButtonClick = (categoryId) => {
         const selectedCategory = (categoryPage.find((category) => category.id === categoryId));
-        setCategory({ id: selectedCategory.id, name: selectedCategory.name })
+        setCategory({ id: selectedCategory.id, name: selectedCategory.name, status: selectedCategory.status })
         setEditMode(true);
         setOpen(true);
     };
@@ -131,12 +147,19 @@ const Category = () => {
     const header = (
         <div className="flex flex-wrap align-items-center justify-content-between gap-2">
             <span className="text-xl text-900 font-bold">Categoria</span>
-                <Button className="form-button bg-blue-400 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+                <Button className="form-button bg-green-400 hover:bg-green-500 border-transparent mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
         </div>
     );
+    const showSuccess = () => {
+        toast.current.show({severity:'success', summary: 'Success', detail:'Registro Efetuado com sucesso!', life: 3000});
+    }
+    const showError = () => {
+        toast.current.show({severity:'error', summary: 'Error', detail:'Falha no registro! Tente novamente mais tarde.', life: 3000});
+    }
 
     return (
         <div className="w-full">
+            <Toast ref={toast} />
             <div className="card flex justify-content-center">
                 <Dialog
                     className="flex ml-8 w-8 h-15rem "
@@ -147,8 +170,8 @@ const Category = () => {
                     }>
                     <form onSubmit={onSave}>
                         <label className="mb-6" htmlFor="name">Nome</label>
-                        <InputText className="flex w-full mb-2" value={category.name} onChange={handleChange} placeholder="Ex: Alimentos" />
-                        <Button className="absolute mb-5 mr-4 mt-3 bottom-0 right-0 dialog-button " severity="success" label="Confirmar" size="small" />
+                        <InputText className="flex w-full mb-2" value={category.name} onChange={handleChange} placeholder="Ex: Alimentos" required={true} />
+                        <Button className="absolute mb-5 mr-4 mt-3 bottom-0 right-0 dialog-button bg-green-400 hover:bg-green-500 border-transparent" severity="success" label="Confirmar" size="small" />
                     </form>
                 </Dialog>
             </div>

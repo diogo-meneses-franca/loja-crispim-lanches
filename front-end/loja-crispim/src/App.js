@@ -9,9 +9,9 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <div class='card h-screen surface-ground '>
+        <div class='card min-h-screen bg-cover surface-ground '>
           <MyAppBar />
-          <div class="flex card-container mt-5">
+          <div class="flex card-container">
             <AdministrativePanel />
             <Navigation />
           </div>

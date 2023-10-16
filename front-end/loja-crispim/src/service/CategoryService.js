@@ -6,7 +6,7 @@ export class CategoryService {
         const url = `${this.url}/category?page=${page}&size=${rowsPerPage}`;
         return fetch(url, {
             method: 'GET'
-        }).catch((error) => { console.error('Erro: Falha na requisição das categorias ' + error) })//.then((response) =>console.log(response.json()));
+        }).catch((error) => { console.error('Erro: Falha na requisição das categorias ' + error) })
     }
 
     post(category) {

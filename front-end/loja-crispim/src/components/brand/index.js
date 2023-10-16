@@ -7,6 +7,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { Toast } from 'primereact/toast';
+import { Paginator } from "primereact/paginator";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
@@ -14,20 +15,22 @@ import '../universal.css'
 
 const Brand = () => {
     const [open, setOpen] = useState(false);
-    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 });
     const [brandPage, setBrandPage] = useState([]);
     const [editMode, setEditMode] = useState(false)
     const [brand, setBrand] = useState({ name: '', status: true });
     const toast = useRef(null);
+    const [first, setFirst] = useState(0);
+    const [rows, setRows] = useState(5);
+    const [totalElements, setTotalElements] = useState(0);
     const brandService = new BrandService();
 
     useEffect(() => {
-        requestBrand(paginationModel);
+        requestBrand();
     }, [])
 
     useEffect(() => {
-        requestBrand(paginationModel);
-    }, [paginationModel])
+        requestBrand();
+    }, [first, rows])
 
     const handleDialogClose = () => {
         setOpen(false);
@@ -35,15 +38,22 @@ const Brand = () => {
         setBrand({ name: "", status: true })
     };
 
+    const handlePageChange = (event) => {
+        setFirst(event.first);
+        setRows(event.rows);
+    }
+
     const handleChange = (event) => {
         setBrand({ ...brand, name: event.target.value });
     }
 
-    const requestBrand = (pagination) => {
-        brandService.get(pagination.page, pagination.pageSize)
+    const requestBrand = () => {
+        const page = first / rows;
+        brandService.get(page/rows)
             .then((response) => response.json())
             .then((data) => {
-                setBrandPage(data.content)
+                setTotalElements(data.totalElements);
+                setBrandPage(data.content);
             })
     }
 
@@ -58,7 +68,7 @@ const Brand = () => {
                     .then((response) => {
                         if (response.status === 200) {
                             showSuccess();
-                            requestBrand(paginationModel);
+                            requestBrand();
                             setEditMode(false);
                             setBrand({ name: '', status: true })
                         }
@@ -74,7 +84,7 @@ const Brand = () => {
                     .then((response) => {
                         if (response.status === 201) {
                             showSuccess();
-                            requestBrand(paginationModel);
+                            requestBrand();
                         }
                         setBrand({ name: '', status: true });
                     })
@@ -91,13 +101,13 @@ const Brand = () => {
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
             brandService.delete(data.id)
-                .then(() => requestBrand(paginationModel));
+                .then(() => requestBrand());
 
         } else {
             let brd = data;
             brd.status = true;
             brandService.update(brd)
-                .then(() => requestBrand(paginationModel));
+                .then(() => requestBrand());
         }
     }
 
@@ -160,11 +170,26 @@ const Brand = () => {
         <div className="w-full">
             <Toast ref={toast} />
             <div className="card flex justify-content-center">
-                <Dialog className="flex ml-8 w-8 h-15rem " header={editMode ? "Editar Marca" : "Cadastrar Marca"} visible={open} onHide={handleDialogClose}>
+                <Dialog 
+                    className="flex ml-8 w-8 h-15rem " 
+                    header={editMode ? "Editar Marca" : "Cadastrar Marca"} 
+                    visible={open} 
+                    onHide={handleDialogClose}>
                     <form onSubmit={onSave}>
                         <label className="mb-6" htmlFor="name">Nome</label>
-                        <InputText className="flex w-full mb-2" value={brand.name} onChange={handleChange} placeholder="Ex: Coca-Cola" required={true} />
-                        <Button className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-green-400 hover:bg-green-500 border-transparent " severity="success" label="Confirmar" size="small" />
+                        <InputText 
+                            className="flex w-full mb-2" 
+                            value={brand.name} 
+                            onChange={handleChange} 
+                            placeholder="Ex: Coca-Cola" 
+                            required={true} 
+                            />
+                        <Button 
+                            className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-green-400 hover:bg-green-500 border-transparent " 
+                            severity="success" 
+                            label="Confirmar" 
+                            size="small" 
+                            />
                     </form>
                 </Dialog>
             </div>
@@ -172,23 +197,49 @@ const Brand = () => {
                 <DataTable 
                     className="mt-8"
                     value={brandPage}
-                    header={header}
-                    paginator
-                    rows={5}
-                    rowsPerPageOptions={[5, 10, 25, 50]}
-                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                    currentPageReportTemplate="{first} to {last} of {totalRecords}"
-                    tableStyle={{
-                        maxWidth: '100%',
-                        position: 'relative',
-
-                    }}>
-                    <Column field="name" header="Nome" sortable></Column>
-                    <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '12%' }} align={"left"}></Column>
-                    <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '13%' }} align={"left"}></Column>
-                    <Column body={editBrandTemplate} header="Editar" style={{ width: '8%' }} align={"right"} />
-                    <Column body={activeBrandTemplate} header="Ativa/Inativar" style={{ width: '15%' }} align={"center"} />
+                    header={header}                                
+                    >
+                    <Column 
+                        field="name" 
+                        header="Nome" 
+                        sortable
+                        />
+                    <Column 
+                        body={createDateBodyTemplate} 
+                        field="createDate" 
+                        header="Criado em" 
+                        sortable 
+                        style={{ width: '12%' }} 
+                        align={"left"}
+                        />
+                    <Column 
+                        body={updateDateBodyTemplate} 
+                        field="updateDate" 
+                        header="Alterado em" 
+                        sortable 
+                        style={{ width: '13%' }} 
+                        align={"left"}
+                        />
+                    <Column 
+                        body={editBrandTemplate} 
+                        header="Editar" 
+                        style={{ width: '8%' }} 
+                        align={"right"}
+                        />
+                    <Column 
+                        body={activeBrandTemplate} 
+                        header="Ativa/Inativar" 
+                        style={{ width: '15%' }} 
+                        align={"center"}
+                        />
                 </DataTable>
+                <Paginator
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalElements}
+                    rowsPerPageOptions={[5, 10, 20]}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     )

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Toolbar } from 'primereact/toolbar';
 
 const Footer = ()=>{
     return(
-        <Toolbar class=" bg-blue-400 h-5rem"/>
+        <div className='card flex  mb-0 bg-blue-500 h-10rem'>
+        </div>
     )
 }
 export default Footer;

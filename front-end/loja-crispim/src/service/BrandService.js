@@ -6,7 +6,7 @@ export class BrandService {
         const url = `${this.url}/brand?page=${page}&size=${rowsPerPage}`;
         return fetch(url, {
             method: 'GET'
-        }).catch((error) => { console.error('Erro: Falha na requisição das marcas ' + error) })//.then((response) =>console.log(response.json()));
+        }).catch((error) => { console.error('Erro: Falha na requisição das marcas ' + error) })
     }
 
     post(brand) {

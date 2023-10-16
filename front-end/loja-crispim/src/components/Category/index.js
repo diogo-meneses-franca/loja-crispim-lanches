@@ -7,6 +7,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { Toast } from 'primereact/toast';
+import { Paginator } from "primereact/paginator";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
@@ -14,20 +15,22 @@ import '../universal.css'
 
 const Category = () => {
     const [open, setOpen] = useState(false);
-    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 });
     const [categoryPage, setCategoryPage] = useState([]);
     const [editMode, setEditMode] = useState(false);
     const [category, setCategory] = useState({ name: '', status: true });
     const toast = useRef(null);
+    const [first, setFirst] = useState(0);
+    const [rows, setRows] = useState(5);
+    const [totalElements, setTotalElements] = useState(0);
     const categoryService = new CategoryService();
 
     useEffect(() => {
-        requestCategory(paginationModel);
+        requestCategory();
     }, [])
 
     useEffect(() => {
-        requestCategory(paginationModel);
-    }, [paginationModel])
+        requestCategory();
+    }, [first, rows])
 
     const handleDialogClose = () => {
         setOpen(false);
@@ -35,14 +38,21 @@ const Category = () => {
         setCategory({ name: "", status: true });
     };
 
+    const handlePageChange = (event) => {
+        setFirst(event.first);
+        setRows(event.rows);
+    }
+
     const handleChange = (event) => {
         setCategory({ ...category, name: event.target.value });
     }
 
-    const requestCategory = (pagination) => {
-        categoryService.get(pagination.page, pagination.pageSize)
+    const requestCategory = () => {
+        const page = first / rows;
+        categoryService.get(page, rows)
             .then((response) => response.json())
             .then((data) => {
+                setTotalElements(data.totalElements);
                 setCategoryPage(data.content)
             })
     }
@@ -58,7 +68,7 @@ const Category = () => {
                     .then((response) => {
                         if (response.status === 200) {
                             showSuccess();
-                            requestCategory(paginationModel);
+                            requestCategory();
                             setEditMode(false);
                             setCategory({ name: '', status: true });
                         }
@@ -74,7 +84,7 @@ const Category = () => {
                     .then((response) => {
                         if (response.status === 201) {
                             showSuccess();
-                            requestCategory(paginationModel);
+                            requestCategory();
                         }
                         setCategory({ name: '', status: true });
                     })
@@ -91,13 +101,13 @@ const Category = () => {
     const onDataStatusChangeClick = (data) => {
         if (data.status) {
             categoryService.delete(data.id).then(() => {
-                requestCategory(paginationModel)
+                requestCategory()
             });
 
         } else {
             let cat = data;
             cat.status = true;
-            categoryService.update(cat).then(() => requestCategory(paginationModel));
+            categoryService.update(cat).then(() => requestCategory());
         }
 
     }
@@ -180,20 +190,20 @@ const Category = () => {
                     className="mt-8"
                     header={header}
                     value={categoryPage}
-                    paginator
-                    rows={5}
-                    rowsPerPageOptions={[5, 10, 20]}
-                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                    currentPageReportTemplate="{first} to {last} of {totalRecords}"
-                    tableStyle={{
-                        maxWidth: '100%',
-                    }}>
+                    >
                     <Column field="name" header="Nome" sortable></Column>
                     <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '12%' }} align={"left"}></Column>
                     <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '13%' }} align={"left"}></Column>
                     <Column body={editCategoryTemplate} header="Editar" style={{ width: '8%' }} align={"right"} />
                     <Column body={activeCategoryTemplate} header="Ativa/Inativar" style={{ width: '15%' }} align={"center"} />
                 </DataTable>
+                <Paginator
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalElements}
+                    rowsPerPageOptions={[5, 10, 20]}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     )

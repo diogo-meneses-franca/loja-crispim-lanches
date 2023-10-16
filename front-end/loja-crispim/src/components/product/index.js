@@ -13,6 +13,9 @@ import { FileUpload } from 'primereact/fileupload';
 import { Dropdown } from 'primereact/dropdown';
 import { Galleria } from 'primereact/galleria';
 import { Toast } from 'primereact/toast';
+import { Paginator } from "primereact/paginator";
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
@@ -20,32 +23,31 @@ import '../universal.css'
 
 const Product = () => {
     const [open, setOpen] = useState(false);
-    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 });
     const [totalElements, setTotalElements] = useState(0);
     const [productPage, setProductPage] = useState([]);
     const [editMode, setEditMode] = useState(false)
     const [product, setProduct] = useState({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true })
     const [temporaryImages, setTemporaryImages] = useState([]);
     const [brand, setBrand] = useState([])
-    const [selectedBrand, setSelectedBrand] = useState(null);
     const [category, setCategory] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
     const [imageDialogOpen, setImageDialogOpen] = useState(false)
     const [dialogImages, setDialogImages] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const galleria = useRef(null);
     const toast = useRef(null);
+    const [first, setFirst] = useState(0);
+    const [rows, setRows] = useState(5);
     const productService = new ProductService();
     const brandService = new BrandService();
     const categoryService = new CategoryService();
 
     useEffect(() => {
-        requestProduct(paginationModel);
+        requestProduct();
     }, [])
 
     useEffect(() => {
-        requestProduct(paginationModel);
-    }, [paginationModel])
+        requestProduct();
+    }, [first, rows])
 
     const handleDialogClose = () => {
         setOpen(false);
@@ -53,16 +55,18 @@ const Product = () => {
         setProduct({ name: '', description: '', costValue: 0, saleValue: 0, brand: {}, category: {}, status: true });
     };
 
-    const handleChange = (event) => {
+    const handleInputTextChange = (event) => {
         const { name, value } = event.target;
         setProduct({ ...product, [name]: value });
     }
 
     const handlePageChange = (event) => {
-        setPaginationModel({ page: event.first, pageSize: event.rows })
+        setFirst(event.first);
+        setRows(event.rows);
     }
-    const requestProduct = (pagination) => {
-        productService.get(pagination.page, pagination.pageSize)
+    const requestProduct = () => {
+        const page = first / rows;
+        productService.get(page, rows)
             .then((response) => response.json())
             .then((data) => {
                 setTotalElements(data.totalElements);
@@ -77,23 +81,23 @@ const Product = () => {
             return;
         }
         if (editMode) {
-            try{
+            try {
                 productService.update(product)
                     .then((response) => {
                         if (response.status === 200) {
                             showSuccess();
-                            requestProduct(paginationModel);
+                            requestProduct();
                             setEditMode(false);
                             setProduct({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true });
                         }
                     })
 
-            }catch(error){
+            } catch (error) {
                 showError();
                 console.log(error);
             }
         } else {
-            try{
+            try {
                 const uploadPromises = temporaryImages.map(async (image) => {
                     const url = await productService.getPresignedAwsUrl();
                     const response = await productService.sendImageToAwsS3(url, image);
@@ -101,22 +105,22 @@ const Product = () => {
                         productImages.push({ "url": url.split('?')[0] });
                     }
                 });
-                
+
                 await Promise.all(uploadPromises);
                 const updatedProduct = { ...product, images: productImages };;
-                if(updatedProduct.images.length === 0){
+                if (updatedProduct.images.length === 0) {
                     return;
                 }
                 productService.post(updatedProduct)
                     .then((response) => {
                         if (response.status === 201) {
                             showSuccess();
-                            requestProduct(paginationModel);
+                            requestProduct();
                         }
                         setProduct({ name: '', description: '', costValue: 0, saleValue: 0, images: [], category: {}, brand: {}, status: true });
                     })
-                
-            }catch(error){
+
+            } catch (error) {
                 showError();
                 console.log(error);
             }
@@ -126,12 +130,12 @@ const Product = () => {
 
     const onDataStatusChangeClick = (data) => {
         if (data.status === true) {
-            productService.delete(data.id).then(() => requestProduct(paginationModel));
+            productService.delete(data.id).then(() => requestProduct());
 
         } else {
             let prod = data;
             prod.status = true;
-            productService.update(prod).then(() => requestProduct(paginationModel));
+            productService.update(prod).then(() => requestProduct());
         }
     }
 
@@ -146,7 +150,8 @@ const Product = () => {
             saleValue: selectedProduct.saleValue,
             brand: selectedProduct.brand,
             category: selectedProduct.category,
-            status: selectedProduct.status
+            status: selectedProduct.status,
+            images: selectedProduct.images
         })
         setEditMode(true);
         setOpen(true);
@@ -266,56 +271,40 @@ const Product = () => {
     }
 
     const header = (
-        <div className="flex flex-wrap align-items-center justify-content-between gap-2">
+        <div className="flex flex-wrap align-items-center justify-content-between gap-2 ">
             <span className="text-xl text-900 font-bold">Produto</span>
-            <Button className="form-button bg-green-400 border-transparent hover:bg-green-500 mr-0" label="Cadastrar" onClick={() => handleOpenDialog()} />
+            <Button className="form-button bg-green-400 border-transparent hover:bg-green-500 mr-0 cursor-pointer" label="Cadastrar" onClick={() => handleOpenDialog()} />
         </div>
     );
 
     const itemTemplate = (item) => {
-        return <img src={item.url} alt={item.alt} style={{ width: '100%', display: 'block' }} />;
+        return <img src={item.url} alt={item.alt} style={{ width: '60%', height: '60%', display: 'block', maxHeight: '500px' }} />;
     }
 
     const thumbnailTemplate = (item) => {
-        return <img src={item.url} alt={item.alt} style={{ display: 'block' }} />;
+        return <img className="gap-2" src={item.url} alt={item.alt} style={{ display: 'block', width: '100px', height: '100px' }} />;
     }
     const handleImageDialogClose = () => {
         setImageDialogOpen(false);
     }
 
     const showSuccess = () => {
-        toast.current.show({severity:'success', summary: 'Success', detail:'Registro Efetuado com sucesso!', life: 3000});
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Registro Efetuado com sucesso!', life: 3000 });
     }
     const showError = () => {
-        toast.current.show({severity:'error', summary: 'Error', detail:'Falha no registro! Tente novamente mais tarde.', life: 3000});
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'Falha no registro! Tente novamente mais tarde.', life: 3000 });
     }
+
     return (
         <div className="w-full mb-8 ">
             <Toast ref={toast} />
             <Dialog
-                className="flex ml-8 w-6 h-30rem  justify-content-center  "
+                className="flex w-6 h-39rem  justify-content-center"
                 visible={imageDialogOpen}
                 onHide={handleImageDialogClose}
             >
-                <div className="card flex w-12 h-20rem justify-content-center align-items-center">
-                    <Galleria ref={galleria} value={dialogImages} numVisible={7}
-                        activeIndex={activeIndex} onItemChange={(e) => setActiveIndex(e.index)}
-                        circular fullScreen showItemNavigators showThumbnails={false} item={itemTemplate} thumbnail={thumbnailTemplate} />
-                    <div className="grid" style={{ maxWidth: '400px' }}>
-                        {
-                            dialogImages && dialogImages.map((image, index) => {
-                                let imgEl = <img className="w-8 h-8" src={image.url} alt={image.alt} style={{ cursor: 'pointer' }} onClick={
-                                    () => { setActiveIndex(index); galleria.current.show() }
-                                } />
-                                return (
-                                    <div className="col-3" key={index}>
-                                        {imgEl}
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
-                </div>
+                <Galleria value={dialogImages} numVisible={7} circular
+                    showItemNavigators item={itemTemplate} thumbnail={thumbnailTemplate} />
             </Dialog>
             <div className="card flex justify-content-center">
                 <Dialog
@@ -331,7 +320,7 @@ const Product = () => {
                             className="flex w-full mb-2"
                             name="name"
                             value={product.name}
-                            onChange={handleChange}
+                            onChange={handleInputTextChange}
                             placeholder="Ex: Coca-Cola"
                             required={true}
                         />
@@ -340,7 +329,7 @@ const Product = () => {
                             className="flex w-full mb-2"
                             name="description"
                             value={product.description}
-                            onChange={handleChange}
+                            onChange={handleInputTextChange}
                             placeholder="Ex: Coca-Cola"
                             required={false}
                         />
@@ -380,11 +369,11 @@ const Product = () => {
                                     className="flex"
                                     name="costValue"
                                     value={product.costValue}
-                                    onValueChange={handleChange}
+                                    onValueChange={handleInputTextChange}
                                     required={true}
                                 />
                             </div>
-                            <div className="flex flex-column w-3">
+                            <div className="flex flex-column w-3 ">
                                 <label className="mb-2" name="salePrice">Preço de venda</label>
                                 <InputNumber
                                     mode="currency"
@@ -393,11 +382,29 @@ const Product = () => {
                                     className="flex"
                                     value={product.saleValue}
                                     name="saleValue"
-                                    onValueChange={handleChange}
+                                    onValueChange={handleInputTextChange}
                                     required={true}
                                 />
                             </div>
                         </div>
+                        {((editMode) && (product.images.length != 0)) ?
+                            <div className={"card flex border-round-lg border-400 w-full h-15rem "}>
+                                <ImageList sx={{ width: 1200, height: 200 }} cols={5} rowHeight={164}>
+                                    {product.images.map((item) => (
+                                        <ImageListItem key={item.id} className="align-items-center">
+                                            <img 
+                                                className="w-8 h-10rem shadow-2 border-round-md align-items-center"
+                                                srcSet={`${item.url}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                                src={`${item.url}?w=164&h=164&fit=crop&auto=format`}
+                                                alt={item.title}
+                                                loading="lazy"
+                                            />
+                                        </ImageListItem>
+                                    ))}
+                                </ImageList>
+                            </div>
+                            : <div></div>
+                        }
                         <FileUpload
                             value={product.images}
                             previewWidth={30}
@@ -421,22 +428,11 @@ const Product = () => {
                     </form>
                 </Dialog>
             </div>
-            <div className="m-3">
+            <div className="m-3 ">
                 <DataTable
-                    className="mt-8"
+                    className="mt-8 "
                     header={header}
                     value={productPage}
-                    paginator
-                    rows={5}
-                    first={0}
-                    rowsPerPageOptions={[5, 10, 20]}
-                    totalRecords={totalElements}
-                    onPageChange={handlePageChange}
-                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                    currentPageReportTemplate="{first} to {last} of {totalRecords}"
-                    tableStyle={{
-                        maxWidth: '100%',
-                    }}
                 >
                     <Column
                         field="name"
@@ -501,6 +497,13 @@ const Product = () => {
                         style={{ width: '4%' }} align={"center"}
                     />
                 </DataTable>
+                <Paginator
+                    first={first}
+                    rows={rows}
+                    totalRecords={totalElements}
+                    rowsPerPageOptions={[5, 10, 20]}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     )

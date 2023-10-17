@@ -6,3 +6,7 @@
 .p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider{
     background: #609AF8;
 }
+
+.delete-image-effect:hover{
+    opacity: 40%;
+}

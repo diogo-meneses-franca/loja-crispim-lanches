@@ -14,6 +14,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Galleria } from 'primereact/galleria';
 import { Toast } from 'primereact/toast';
 import { Paginator } from "primereact/paginator";
+
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
@@ -32,8 +33,6 @@ const Product = () => {
     const [category, setCategory] = useState([]);
     const [imageDialogOpen, setImageDialogOpen] = useState(false)
     const [dialogImages, setDialogImages] = useState(null);
-    const [activeIndex, setActiveIndex] = useState(0);
-    const galleria = useRef(null);
     const toast = useRef(null);
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(5);
@@ -48,6 +47,7 @@ const Product = () => {
     useEffect(() => {
         requestProduct();
     }, [first, rows])
+    useEffect(()=>{}, [product])
 
     const handleDialogClose = () => {
         setOpen(false);
@@ -69,12 +69,15 @@ const Product = () => {
         productService.get(page, rows)
             .then((response) => response.json())
             .then((data) => {
+                console.log(data.content);
                 setTotalElements(data.totalElements);
                 setProductPage(data.content);
             })
     }
 
     const onSave = async (event) => {
+        event.preventDefault();
+        console.log(event);
         const productImages = []
         event.preventDefault();
         if (product.name.trim() === '' || product.costValue === 0 || product.saleValue === 0) {
@@ -82,6 +85,7 @@ const Product = () => {
         }
         if (editMode) {
             try {
+                console.log(product);
                 productService.update(product)
                     .then((response) => {
                         if (response.status === 200) {
@@ -98,20 +102,7 @@ const Product = () => {
             }
         } else {
             try {
-                const uploadPromises = temporaryImages.map(async (image) => {
-                    const url = await productService.getPresignedAwsUrl();
-                    const response = await productService.sendImageToAwsS3(url, image);
-                    if (response.status === 200) {
-                        productImages.push({ "url": url.split('?')[0] });
-                    }
-                });
-
-                await Promise.all(uploadPromises);
-                const updatedProduct = { ...product, images: productImages };;
-                if (updatedProduct.images.length === 0) {
-                    return;
-                }
-                productService.post(updatedProduct)
+                productService.post(product)
                     .then((response) => {
                         if (response.status === 201) {
                             showSuccess();
@@ -235,12 +226,14 @@ const Product = () => {
     };
 
     const imageBodyTemplate = (product) => {
-        return <img className="w-8rem h-8rem border-round border-transparent" src={product.images[0]?.url} onClick={() => handleImageDialog(product.images)} />;
+        return <img className={((product.images.length > 0) ? "w-8rem h-8rem border-round border-transparent": "w-0")} src={product.images[0]?.url} onClick={() => handleImageDialog(product.images)} />;
     };
     const handleImageDialog = (img) => {
-        console.log(img);
-        setDialogImages(img);
-        setImageDialogOpen(true);
+        if(img.length > 0){
+            console.log(img);
+            setDialogImages(img);
+            setImageDialogOpen(true);
+        }
     }
 
     const handleFakeImgUpload = (event) => {
@@ -293,6 +286,12 @@ const Product = () => {
     }
     const showError = () => {
         toast.current.show({ severity: 'error', summary: 'Error', detail: 'Falha no registro! Tente novamente mais tarde.', life: 3000 });
+    }
+
+    const handleDeleteImage = (item)=>{
+        const updatedImages = product.images;
+        updatedImages.pop(item);
+        setProduct({...product, images: updatedImages});
     }
 
     return (
@@ -387,17 +386,18 @@ const Product = () => {
                                 />
                             </div>
                         </div>
-                        {((editMode) && (product.images.length != 0)) ?
+                        {((editMode) && (product.images.length !== 0)) ?
                             <div className={"card flex border-round-lg border-400 w-full h-15rem "}>
                                 <ImageList sx={{ width: 1200, height: 200 }} cols={5} rowHeight={164}>
                                     {product.images.map((item) => (
                                         <ImageListItem key={item.id} className="align-items-center">
                                             <img 
-                                                className="w-8 h-10rem shadow-2 border-round-md align-items-center"
+                                                className="w-8 h-10rem shadow-2 border-round-md align-items-center cursor-pointer delete-image-effect"    
                                                 srcSet={`${item.url}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                                                 src={`${item.url}?w=164&h=164&fit=crop&auto=format`}
                                                 alt={item.title}
                                                 loading="lazy"
+                                                onClick={handleDeleteImage}
                                             />
                                         </ImageListItem>
                                     ))}
@@ -509,3 +509,19 @@ const Product = () => {
     )
 }
 export default Product;
+
+/* const uploadPromises = product.images.map(async (image) => {
+                    const url = await productService.getPresignedAwsUrl();
+                    const response = await productService.sendImageToAwsS3(url, image);
+                    if (response.status === 200) {
+                        productImages.push({ "url": url.split('?')[0] });
+                    }
+                });
+
+                await Promise.all(uploadPromises);
+                const updatedProduct = { ...product, images: productImages };;
+                if (updatedProduct.images.length === 0) {
+                    return;
+                }
+
+                */

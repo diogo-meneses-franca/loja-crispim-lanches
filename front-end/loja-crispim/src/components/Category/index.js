@@ -156,8 +156,8 @@ const Category = () => {
 
     const header = (
         <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-            <span className="text-xl text-900 font-bold">Categoria</span>
-                <Button className="form-button bg-green-400 hover:bg-green-500 border-transparent mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+            <span className="text-xl text-red-500 font-bold">Categoria</span>
+                <Button className="form-button  bg-red-500 border-transparent hover:bg-red-400 mr-0 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
         </div>
     );
     const showSuccess = () => {

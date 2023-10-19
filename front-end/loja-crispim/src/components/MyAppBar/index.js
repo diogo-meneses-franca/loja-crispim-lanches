@@ -13,20 +13,20 @@ const MyAppBar = () => {
 
   const startContent = (
     <React.Fragment>
-      <Button label="Home" className="inline m-3 bg-blue-500 border-transparent" onClick={() => loadPage('/')} />
+      <Button label="Home" className="inline m-3 surface-200 text-red-500 font-bold border-transparent text-lg  " onClick={() => loadPage('/')} />
     </React.Fragment>
   );
 
   const endContent = (
     <React.Fragment>
-      <Button icon="pi pi-user" className="inline bg-blue-500 border-transparent" />
+      <Button icon="pi pi-user" className="inline text-red-500 surface-200 font-bold border-transparent" />
     </React.Fragment>
   );
 
   return (
 
-    <div className='card bg-blue-500'>
-      <Toolbar className='bg-blue-500 border-transparent' start={startContent} end={endContent} />
+    <div className='card surface-200'>
+      <Toolbar className='surface-200 border-transparent' start={startContent} end={endContent} />
     </div>
 
   );

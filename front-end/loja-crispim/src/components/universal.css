@@ -1,12 +1,30 @@
 
 .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider{
-    background-color:  #3B82F6;
+    background-color:  #5DAE4F;
 }
 
 .p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider{
-    background: #609AF8;
+    background: #C5D825;
 }
 
 .delete-image-effect:hover{
     opacity: 40%;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+    color: #6B7A84
+}
+
+.p-fileupload .p-fileupload-buttonbar .p-button {
+    background-color: #FF3D32;
+    border-color: #ffffff;
+}
+
+.p-fileupload .p-fileupload-buttonbar .p-button:hover {
+    background-color: #FF3D32;
+    border-color: #ffffff;
+}
+
+.p-dialog .p-dialog-header .p-dialog-title {
+    color: #FF3D32;
 }

@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <div class='card min-h-screen flex-column bg-cover surface-ground '>
+        <div class='card min-h-screen flex-column bg-cover bg-white '>
           <MyAppBar />
           <div class="flex card-container min-h-screen">
             <AdministrativePanel />

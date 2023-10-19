@@ -154,8 +154,8 @@ const AddrState = () => {
     };
     const header = (
         <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-            <span className="text-xl text-900 font-bold">Estado</span>
-            <Button className="form-button bg-green-400 hover:bg-green-500 border-transparent mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+            <span className="text-xl text-red-500 font-bold">Estado</span>
+            <Button className="form-button  bg-red-500 border-transparent hover:bg-red-400 mr-0 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
         </div>
     );
     const showSuccess = () => {
@@ -180,7 +180,7 @@ const AddrState = () => {
                         <InputText className="flex w-full mb-2" name="name" value={addrState.name} onChange={handleChange} placeholder="Ex: Paraná" required={true} />
                         <label className="mb-6" htmlFor="acronym">Sigla</label>
                         <InputText className="flex w-full mb-2" name="acronym" value={addrState.acronym} onChange={handleChange} placeholder="Ex: PR" required={true} />
-                        <Button className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-green-400 hover:bg-green-500 border-transparent " severity="success" label="Confirmar" size="small" />
+                        <Button className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button  bg-red-500 border-transparent hover:bg-red-400 mr-0 " severity="success" label="Confirmar" size="small" />
 
                     </form>
                 </Dialog>

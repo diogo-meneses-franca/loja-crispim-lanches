@@ -1,24 +1,22 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState} from "react";
 import { BrandService } from "../../service/BrandService";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
-import { Toast } from 'primereact/toast';
 import { Paginator } from "primereact/paginator";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import '../universal.css'
+import BrandFormDialog from "./brandFormDialog";
 
 const Brand = () => {
-    const [open, setOpen] = useState(false);
-    const [brandPage, setBrandPage] = useState([]);
-    const [editMode, setEditMode] = useState(false)
     const [brand, setBrand] = useState({ name: '', status: true });
-    const toast = useRef(null);
+    const [brandPage, setBrandPage] = useState([]);
+    const [editMode, setEditMode] = useState(false);
+    
+    const [open, setOpen] = useState(false);      
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(5);
     const [totalElements, setTotalElements] = useState(0);
@@ -26,26 +24,29 @@ const Brand = () => {
 
     useEffect(() => {
         requestBrand();
-    }, [])
+    }, []);
 
     useEffect(() => {
         requestBrand();
-    }, [first, rows])
+    }, [first, rows]);
 
-    const handleDialogClose = () => {
-        setOpen(false);
+    const handleOpenDialog = ()=>{
+            setOpen(true);
+    }
+    useEffect(()=>{},[brandPage]);
+
+    const handleCloseDialog = ()=>{
+        console.log("função callback chamada!");
+        setBrand({name: '', status: true});
+        requestBrand();
         setEditMode(false);
-        setBrand({ name: "", status: true })
-    };
+        setOpen(false);
+    }
 
     const handlePageChange = (event) => {
         setFirst(event.first);
         setRows(event.rows);
-    }
-
-    const handleChange = (event) => {
-        setBrand({ ...brand, name: event.target.value });
-    }
+    };
 
     const requestBrand = () => {
         const page = first / rows;
@@ -55,47 +56,6 @@ const Brand = () => {
                 setTotalElements(data.totalElements);
                 setBrandPage(data.content);
             })
-    }
-
-    const onSave = (event) => {
-        event.preventDefault();
-        if (brand.name.trim() === '') {
-            return;
-        }
-        if (editMode) {
-            try{
-                brandService.update(brand)
-                    .then((response) => {
-                        if (response.status === 200) {
-                            showSuccess();
-                            requestBrand();
-                            setEditMode(false);
-                            setBrand({ name: '', status: true })
-                        }
-                    })
-
-            }catch(error){
-                showError();
-                console.log(error);
-            }  
-        } else {
-            try{
-                brandService.post(brand)
-                    .then((response) => {
-                        if (response.status === 201) {
-                            showSuccess();
-                            requestBrand();
-                        }
-                        setBrand({ name: '', status: true });
-                    })
-
-            }catch(error){
-                showError();
-                console.log(error);
-            }
-
-        }
-        handleDialogClose();
     };
 
     const onDataStatusChangeClick = (data) => {
@@ -109,7 +69,7 @@ const Brand = () => {
             brandService.update(brd)
                 .then(() => requestBrand());
         }
-    }
+    };
 
     const handleEditButtonClick = (brandId) => {
         const selectedBrand = (brandPage.find((brand) => brand.id === brandId));
@@ -145,7 +105,7 @@ const Brand = () => {
                 />
             </div>
         )
-    }
+    };
 
     const activeBrandTemplate = (rowData) => {
         return (
@@ -153,51 +113,22 @@ const Brand = () => {
         );
     };
 
-    const header = (
+    const tableHeader = (
         <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-            <span className="text-xl text-900 font-bold">Marca</span>
-                <Button className="form-button bg-green-400 hover:bg-green-500 border-transparent mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
+            <span className="text-xl text-red-500 font-bold">Marca</span>
+                <Button className="form-button  bg-red-500 border-transparent hover:bg-red-400 mr-0 mr-6" label="Cadastrar" onClick={() => handleOpenDialog()} />
         </div>
     );
-    const showSuccess = () => {
-        toast.current.show({severity:'success', summary: 'Success', detail:'Registro Efetuado com sucesso!', life: 3000});
-    }
-    const showError = () => {
-        toast.current.show({severity:'error', summary: 'Error', detail:'Falha no registro! Tente novamente mais tarde.', life: 3000});
-    }
+    
 
     return (
         <div className="w-full">
-            <Toast ref={toast} />
-            <div className="card flex justify-content-center">
-                <Dialog 
-                    className="flex ml-8 w-8 h-15rem " 
-                    header={editMode ? "Editar Marca" : "Cadastrar Marca"} 
-                    visible={open} 
-                    onHide={handleDialogClose}>
-                    <form onSubmit={onSave}>
-                        <label className="mb-6" htmlFor="name">Nome</label>
-                        <InputText 
-                            className="flex w-full mb-2" 
-                            value={brand.name} 
-                            onChange={handleChange} 
-                            placeholder="Ex: Coca-Cola" 
-                            required={true} 
-                            />
-                        <Button 
-                            className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-green-400 hover:bg-green-500 border-transparent " 
-                            severity="success" 
-                            label="Confirmar" 
-                            size="small" 
-                            />
-                    </form>
-                </Dialog>
-            </div>
+            <BrandFormDialog open={open} editMode={editMode} onclose={handleCloseDialog} brandPar={brand}/>           
             <div className="m-3">
                 <DataTable 
                     className="mt-8"
                     value={brandPage}
-                    header={header}                                
+                    header={tableHeader}                                
                     >
                     <Column 
                         field="name" 

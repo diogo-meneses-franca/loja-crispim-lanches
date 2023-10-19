@@ -27,9 +27,8 @@ const Product = () => {
     const [totalElements, setTotalElements] = useState(0);
     const [productPage, setProductPage] = useState([]);
     const [editMode, setEditMode] = useState(false)
-    const [product, setProduct] = useState({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true })
-    const [temporaryImages, setTemporaryImages] = useState([]);
-    const [brand, setBrand] = useState([])
+    const [product, setProduct] = useState({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true, images: []});
+    const [brand, setBrand] = useState([]);
     const [category, setCategory] = useState([]);
     const [imageDialogOpen, setImageDialogOpen] = useState(false)
     const [dialogImages, setDialogImages] = useState(null);
@@ -47,12 +46,12 @@ const Product = () => {
     useEffect(() => {
         requestProduct();
     }, [first, rows])
-    useEffect(()=>{}, [product])
+    useEffect(() => { }, [product])
 
     const handleDialogClose = () => {
         setOpen(false);
         setEditMode(false);
-        setProduct({ name: '', description: '', costValue: 0, saleValue: 0, brand: {}, category: {}, status: true });
+        setProduct({ name: '', description: '', costValue: 0, saleValue: 0, brand: {}, category: {}, status: true, images: [] });
     };
 
     const handleInputTextChange = (event) => {
@@ -77,22 +76,18 @@ const Product = () => {
 
     const onSave = async (event) => {
         event.preventDefault();
-        console.log(event);
-        const productImages = []
-        event.preventDefault();
         if (product.name.trim() === '' || product.costValue === 0 || product.saleValue === 0) {
             return;
         }
         if (editMode) {
             try {
-                console.log(product);
                 productService.update(product)
                     .then((response) => {
                         if (response.status === 200) {
                             showSuccess();
                             requestProduct();
                             setEditMode(false);
-                            setProduct({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true });
+                            setProduct({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true, images: [] });
                         }
                     })
 
@@ -226,18 +221,28 @@ const Product = () => {
     };
 
     const imageBodyTemplate = (product) => {
-        return <img className={((product.images.length > 0) ? "w-8rem h-8rem border-round border-transparent": "w-0")} src={product.images[0]?.url} onClick={() => handleImageDialog(product.images)} />;
+        return <img className={((product.images.length > 0) ? "w-8rem h-8rem border-round border-transparent" : "w-0")} src={product.images[0]?.url} onClick={() => handleImageDialog(product.images)} />;
     };
     const handleImageDialog = (img) => {
-        if(img.length > 0){
+        if (img.length > 0) {
             console.log(img);
             setDialogImages(img);
             setImageDialogOpen(true);
         }
     }
 
-    const handleFakeImgUpload = (event) => {
-        setTemporaryImages(event.files)
+    const handleImageUpload = async (event) => {
+        const productImages = product.images;
+        const files = event.files;
+        for (let file of files) {
+            const url = await productService.getPresignedAwsUrl();
+            const response = await productService.sendImageToAwsS3(url, file);
+            if (response.status === 200) {
+                productImages.push({ "url": url.split('?')[0] });
+            }
+        }
+        setProduct({ ...product, images: productImages });
+
     }
 
     const descriptionBodyTemplate = (rowData) => {
@@ -265,8 +270,8 @@ const Product = () => {
 
     const header = (
         <div className="flex flex-wrap align-items-center justify-content-between gap-2 ">
-            <span className="text-xl text-900 font-bold">Produto</span>
-            <Button className="form-button bg-green-400 border-transparent hover:bg-green-500 mr-0 cursor-pointer" label="Cadastrar" onClick={() => handleOpenDialog()} />
+            <span className="text-xl text-red-500 font-bold">Produto</span>
+            <Button className="form-button bg-red-500 border-transparent hover:bg-red-400 mr-0 cursor-pointer" label="Cadastrar" onClick={() => handleOpenDialog()} />
         </div>
     );
 
@@ -288,10 +293,10 @@ const Product = () => {
         toast.current.show({ severity: 'error', summary: 'Error', detail: 'Falha no registro! Tente novamente mais tarde.', life: 3000 });
     }
 
-    const handleDeleteImage = (item)=>{
+    const handleDeleteImage = (item) => {
         const updatedImages = product.images;
         updatedImages.pop(item);
-        setProduct({...product, images: updatedImages});
+        setProduct({ ...product, images: updatedImages });
     }
 
     return (
@@ -386,13 +391,13 @@ const Product = () => {
                                 />
                             </div>
                         </div>
-                        {((editMode) && (product.images.length !== 0)) ?
+                        {(product.images.length !== 0) ?
                             <div className={"card flex border-round-lg border-400 w-full h-15rem "}>
                                 <ImageList sx={{ width: 1200, height: 200 }} cols={5} rowHeight={164}>
                                     {product.images.map((item) => (
-                                        <ImageListItem key={item.id} className="align-items-center">
-                                            <img 
-                                                className="w-8 h-10rem shadow-2 border-round-md align-items-center cursor-pointer delete-image-effect"    
+                                        <ImageListItem key={item.id} className="align-items-center ">
+                                            <img
+                                                className="w-8 h-10rem mt-2 shadow-2 border-round-md align-items-center cursor-pointer delete-image-effect"
                                                 srcSet={`${item.url}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                                                 src={`${item.url}?w=164&h=164&fit=crop&auto=format`}
                                                 alt={item.title}
@@ -413,12 +418,12 @@ const Product = () => {
                             maxFileSize={1000000}
                             multiple
                             customUpload
-                            uploadHandler={handleFakeImgUpload}
+                            uploadHandler={handleImageUpload}
                             emptyTemplate={<p className="m-0">Arraste e solte as imagens aqui.</p>}
                         />
                         <div className="align-items-end w-full h-5rem">
                             <Button
-                                className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-green-400 border-transparent hover:bg-green-500 "
+                                className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-red-500 border-transparent hover:bg-red-400 text-white "
                                 name="confirmar"
                                 severity="success"
                                 label="Confirmar"

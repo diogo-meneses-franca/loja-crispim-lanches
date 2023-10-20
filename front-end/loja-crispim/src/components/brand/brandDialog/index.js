@@ -5,15 +5,13 @@ import { Toast } from 'primereact/toast';
 import { BrandService } from "../../../service/BrandService";
 import { Button } from 'primereact/button';
 
-export const BrandFormDialog = ({ open, onclose, brandPar, editMode }) => {
+export const BrandDialog = ({ open, onclose, brandToEdit, editMode }) => {
     const [brand, setBrand] = useState({ name: '', status: true });
     const toast = useRef(null);
     const brandService = new BrandService();
 
     useEffect(()=>{
-        if(editMode){
-            setBrand(brandPar);
-        }
+        (editMode) && setBrand(brandToEdit);
     },[open]);
 
     const handleDialogClose = () => {
@@ -41,10 +39,10 @@ export const BrandFormDialog = ({ open, onclose, brandPar, editMode }) => {
                 brandService.update(brand)
                     .then((response) => {
                         if (response.status === 200) {
+                            handleDialogClose();
                             showSuccess();
                         }
                     });
-
             } catch (error) {
                 showError();
                 console.error(error);
@@ -54,17 +52,17 @@ export const BrandFormDialog = ({ open, onclose, brandPar, editMode }) => {
                 brandService.post(brand)
                     .then((response) => {
                         if (response.status === 201) {
+                            handleDialogClose();
                             showSuccess();
                         }
                     });
-
             } catch (error) {
                 showError();
                 console.error(error);
             }
-
         }
-        handleDialogClose();
+        
+        
     };
 
     return (
@@ -79,17 +77,17 @@ export const BrandFormDialog = ({ open, onclose, brandPar, editMode }) => {
                     <form onSubmit={onSave}>
                         <label className="mb-6" htmlFor="name">Nome</label>
                         <InputText
-                        className="flex w-full mb-2"
-                        value={brand.name}
-                        onChange={handleChange}
-                        placeholder="Ex: Coca-Cola"
-                        required={true}
+                            className="flex w-full mb-2"
+                            value={brand.name}
+                            onChange={handleChange}
+                            placeholder="Ex: Coca-Cola"
+                            required={true}
                         />
                         <Button
-                            className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-red-500 border-transparent hover:bg-red-400 mr-0 "
+                            className="absolute mb-5 mr-4 bottom-0 right-0 dialog-button bg-red-500 border-transparent hover:bg-red-400 mr-0"
                             severity="success"
                             label="Confirmar"
-                            size="small" />
+                            size="small"/>
                     </form>
                 </Dialog>
             </div>
@@ -97,4 +95,4 @@ export const BrandFormDialog = ({ open, onclose, brandPar, editMode }) => {
     );
 
 };
-export default BrandFormDialog;
+export default BrandDialog;

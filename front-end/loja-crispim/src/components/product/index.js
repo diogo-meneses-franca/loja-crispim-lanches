@@ -391,7 +391,7 @@ const Product = () => {
                                 />
                             </div>
                         </div>
-                        {(product.images.length !== 0) ?
+                        {(product.images.length !== 0) &&
                             <div className={"card flex border-round-lg border-400 w-full h-15rem "}>
                                 <ImageList sx={{ width: 1200, height: 200 }} cols={5} rowHeight={164}>
                                     {product.images.map((item) => (
@@ -408,16 +408,17 @@ const Product = () => {
                                     ))}
                                 </ImageList>
                             </div>
-                            : <div></div>
                         }
                         <FileUpload
                             value={product.images}
                             previewWidth={30}
-                            name="images" url={"#"}
+                            name="images" 
+                            url={"#"}
                             accept="image/*"
                             maxFileSize={1000000}
                             multiple
-                            customUpload
+                            customUpload={true}
+                            auto={true}
                             uploadHandler={handleImageUpload}
                             emptyTemplate={<p className="m-0">Arraste e solte as imagens aqui.</p>}
                         />
@@ -461,7 +462,7 @@ const Product = () => {
                     <Column
                         body={costValueBodyTemplate}
                         field="costValue"
-                        header="custo"
+                        header="Custo"
                         sortable
                         align={"center"}
                         style={{ width: '3%' }}
@@ -469,7 +470,7 @@ const Product = () => {
                     <Column
                         body={saleValueBodyTemplate}
                         field="saleValue"
-                        header="venda"
+                        header="Venda"
                         sortable
                         align={"center"}
                         style={{ width: '3%' }}

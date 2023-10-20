@@ -3,22 +3,22 @@ import { CategoryService } from "../../service/CategoryService";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from "primereact/inputtext";
+
 import { InputSwitch } from "primereact/inputswitch";
-import { Toast } from 'primereact/toast';
+
 import { Paginator } from "primereact/paginator";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import '../universal.css'
+import CategoryDialog from "./categoryDialog";
 
 const Category = () => {
     const [open, setOpen] = useState(false);
     const [categoryPage, setCategoryPage] = useState([]);
     const [editMode, setEditMode] = useState(false);
     const [category, setCategory] = useState({ name: '', status: true });
-    const toast = useRef(null);
+    
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(5);
     const [totalElements, setTotalElements] = useState(0);
@@ -33,6 +33,7 @@ const Category = () => {
     }, [first, rows])
 
     const handleDialogClose = () => {
+        requestCategory();
         setOpen(false);
         setEditMode(false);
         setCategory({ name: "", status: true });
@@ -43,9 +44,7 @@ const Category = () => {
         setRows(event.rows);
     }
 
-    const handleChange = (event) => {
-        setCategory({ ...category, name: event.target.value });
-    }
+    
 
     const requestCategory = () => {
         const page = first / rows;
@@ -57,46 +56,7 @@ const Category = () => {
             })
     }
 
-    const onSave = (event) => {
-        event.preventDefault();
-        if (category.name.trim() === '') {
-            return;
-        }
-        if (editMode) {
-            try{
-                categoryService.update(category)
-                    .then((response) => {
-                        if (response.status === 200) {
-                            showSuccess();
-                            requestCategory();
-                            setEditMode(false);
-                            setCategory({ name: '', status: true });
-                        }
-                    })
-
-            }catch(error){
-                showError();
-                console.log(error);
-            }
-        } else {
-            try{
-                categoryService.post(category)
-                    .then((response) => {
-                        if (response.status === 201) {
-                            showSuccess();
-                            requestCategory();
-                        }
-                        setCategory({ name: '', status: true });
-                    })
-
-            }catch(error){
-                showError();
-                console.log(error);
-            }
-
-        }
-        handleDialogClose();
-    };
+    
 
     const onDataStatusChangeClick = (data) => {
         if (data.status) {
@@ -160,31 +120,11 @@ const Category = () => {
                 <Button className="form-button  bg-red-500 border-transparent hover:bg-red-400 mr-0 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
         </div>
     );
-    const showSuccess = () => {
-        toast.current.show({severity:'success', summary: 'Success', detail:'Registro Efetuado com sucesso!', life: 3000});
-    }
-    const showError = () => {
-        toast.current.show({severity:'error', summary: 'Error', detail:'Falha no registro! Tente novamente mais tarde.', life: 3000});
-    }
-
+    
     return (
         <div className="w-full">
-            <Toast ref={toast} />
-            <div className="card flex justify-content-center">
-                <Dialog
-                    className="flex ml-8 w-8 h-15rem "
-                    header={editMode ? "Editar Categoria" : "Cadastrar Categoria"}
-                    visible={open}
-                    onHide={handleDialogClose}
-                    style={{ width: '50vw' }
-                    }>
-                    <form onSubmit={onSave}>
-                        <label className="mb-6" htmlFor="name">Nome</label>
-                        <InputText className="flex w-full mb-2" value={category.name} onChange={handleChange} placeholder="Ex: Alimentos" required={true} />
-                        <Button className="absolute mb-5 mr-4 mt-3 bottom-0 right-0 dialog-button bg-green-400 hover:bg-green-500 border-transparent" severity="success" label="Confirmar" size="small" />
-                    </form>
-                </Dialog>
-            </div>
+            <CategoryDialog open={open} onclose={handleDialogClose} editMode={editMode} categoryToEdit={category}/>
+            
             <div className="m-3">
                 <DataTable
                     className="mt-8"

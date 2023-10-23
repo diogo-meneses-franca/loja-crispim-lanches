@@ -515,19 +515,3 @@ const Product = () => {
     )
 }
 export default Product;
-
-/* const uploadPromises = product.images.map(async (image) => {
-                    const url = await productService.getPresignedAwsUrl();
-                    const response = await productService.sendImageToAwsS3(url, image);
-                    if (response.status === 200) {
-                        productImages.push({ "url": url.split('?')[0] });
-                    }
-                });
-
-                await Promise.all(uploadPromises);
-                const updatedProduct = { ...product, images: productImages };;
-                if (updatedProduct.images.length === 0) {
-                    return;
-                }
-
-                */

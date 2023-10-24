@@ -1,17 +1,15 @@
+
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import '../universal.css'
-import CategoryTable from "./categoryTable";
+import BrandTable from "./BrandTable";
 
-const Category = () => {
-    
-    
-    
+const Brand = () => {
     return (
-        <div className="w-full">
-            <CategoryTable/>
-        </div>
+        <>
+            <BrandTable/>
+        </>
     )
 }
-export default Category;
+export default Brand;

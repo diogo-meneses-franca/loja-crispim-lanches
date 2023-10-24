@@ -1,9 +1,10 @@
 import {Routes, Route } from "react-router-dom";
-import Home from "../Home";
-import Category from "../Category";
-import Brand from "../brand";
-import Product from "../product";
-import AddrState from "../addrState";
+import Home from "../Home/Home";
+import Brand from "../brand/Brand";
+import Product from "../product/Product";
+import AddrState from "../addrState/AddrState";
+import Category from "../Category/Category";
+
 
 
 const Navigation = () => {

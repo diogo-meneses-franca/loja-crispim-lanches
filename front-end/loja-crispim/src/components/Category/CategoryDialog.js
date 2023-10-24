@@ -4,17 +4,22 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { Toast } from 'primereact/toast';
-import { CategoryService } from "../../../service/CategoryService";
+import { CategoryService } from "../../service/CategoryService";
 
 
 
-const CategoryDialog = ({open, onclose, categoryToEdit, editMode}) => {
+const CategoryDialog = ({open, onclose, categoryToEdit}) => {
     const [category, setCategory] = useState({ name: '', status: true });
+    const [editMode, setEditMode] = useState(false);
     const toast = useRef(null);
     const categoryService = new CategoryService();
 
     useEffect(()=>{
-        (editMode) && setCategory(categoryToEdit);
+        if(categoryToEdit){
+            setEditMode(true);
+            setCategory(categoryToEdit);
+
+        }
     },[editMode])
     
     const handleDialogClose = ()=>{

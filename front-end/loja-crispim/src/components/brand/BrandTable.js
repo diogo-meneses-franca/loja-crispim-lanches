@@ -4,8 +4,8 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputSwitch } from "primereact/inputswitch";
 import { Paginator } from "primereact/paginator";
-import BrandDialog from "../brandDialog";
-import { BrandService } from "../../../service/BrandService";
+import BrandDialog from "./BrandDialog";
+import { BrandService } from "../../service/BrandService";
 
 const BrandTable = () => {
     const [brand, setBrand] = useState({ name: '', status: true });
@@ -13,7 +13,6 @@ const BrandTable = () => {
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(5);
     const [totalElements, setTotalElements] = useState(0);
-    const [editMode, setEditMode] = useState(false);
     const [open, setOpen] = useState(false);
     const brandService = new BrandService();
 
@@ -32,7 +31,6 @@ const BrandTable = () => {
     const handleCloseDialog = () => {
         setBrand({ name: '', status: true });
         requestBrand();
-        setEditMode(false);
         setOpen(false);
     }
 
@@ -55,7 +53,6 @@ const BrandTable = () => {
     const handleEditButtonClick = (brandId) => {
         const selectedBrand = (brandPage.find((brand) => brand.id === brandId));
         setBrand({ id: selectedBrand.id, name: selectedBrand.name, status: selectedBrand.status })
-        setEditMode(true);
         setOpen(true);
     };
 
@@ -118,7 +115,7 @@ const BrandTable = () => {
 
     return (
         <div className="w-full">
-            <BrandDialog open={open} editMode={editMode} onclose={handleCloseDialog} brandToEdit={brand} />
+            <BrandDialog open={open} onclose={handleCloseDialog} brandToEdit={brand} />
             <div className="m-3">
                 <DataTable
                     className="mt-8"

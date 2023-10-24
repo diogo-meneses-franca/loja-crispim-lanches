@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter } from "react-router-dom";
 import '/node_modules/primeflex/primeflex.css';
-import MyAppBar from "./components/MyAppBar";
-import AdministrativePanel from './components/administrativePanel';
-import Navigation from './components/navigation';
-import Footer from './components/footer';
+import MyAppBar from "./components/myAppBar/MyAppBar";
+import AdministrativePanel from './components/administrativePanel/AdministrativePanel';
+import Navigation from './components/navigation/Navigation';
+import Footer from './components/footer/Footer';
 
 function App() {
   return (

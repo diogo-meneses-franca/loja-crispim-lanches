@@ -4,8 +4,8 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputSwitch } from "primereact/inputswitch";
 import { Paginator } from "primereact/paginator";
-import CategoryDialog from "../categoryDialog";
-import { CategoryService } from "../../../service/CategoryService";
+import CategoryDialog from "./CategoryDialog";
+import { CategoryService } from "../../service/CategoryService";
 
 
 
@@ -13,9 +13,7 @@ import { CategoryService } from "../../../service/CategoryService";
 const CategoryTable = () => {
     const [open, setOpen] = useState(false);
     const [categoryPage, setCategoryPage] = useState([]);
-    const [editMode, setEditMode] = useState(false);
     const [category, setCategory] = useState({ name: '', status: true });
-
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(5);
     const [totalElements, setTotalElements] = useState(0);
@@ -30,9 +28,8 @@ const CategoryTable = () => {
     }, [first, rows])
 
     const handleDialogClose = () => {
-        requestCategory();
         setOpen(false);
-        setEditMode(false);
+        requestCategory();
         setCategory({ name: "", status: true });
     };
 
@@ -70,10 +67,11 @@ const CategoryTable = () => {
     }
 
     const handleEditButtonClick = (categoryId) => {
-        const selectedCategory = (categoryPage.find((category) => category.id === categoryId));
-        setCategory({ id: selectedCategory.id, name: selectedCategory.name, status: selectedCategory.status })
-        setEditMode(true);
-        setOpen(true);
+        categoryPage.find((object) => object.id === categoryId).then((object)=>{
+            setCategory({ id: object.id, name: object.name, status: object.status });
+            setOpen(true);
+
+    });
     };
 
     const formatDate = (value) => {
@@ -121,7 +119,7 @@ const CategoryTable = () => {
     };
     return (
         <>
-            <CategoryDialog open={open} onclose={handleDialogClose} editMode={editMode} categoryToEdit={category} />
+            <CategoryDialog open={open} onclose={handleDialogClose} categoryToEdit={category} />
 
             <div className="m-3">
                 <DataTable

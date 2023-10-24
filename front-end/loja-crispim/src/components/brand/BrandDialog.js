@@ -2,16 +2,20 @@ import React, { useState, useRef, useEffect } from "react";
 import { Dialog } from 'primereact/dialog';
 import { InputText } from "primereact/inputtext";
 import { Toast } from 'primereact/toast';
-import { BrandService } from "../../../service/BrandService";
+import { BrandService } from "../../service/BrandService";
 import { Button } from 'primereact/button';
 
-export const BrandDialog = ({ open, onclose, brandToEdit, editMode }) => {
+export const BrandDialog = ({ open, brandToEdit, onclose}) => {
     const [brand, setBrand] = useState({ name: '', status: true });
+    const [editMode, setEditMode] = useState(false);
     const toast = useRef(null);
     const brandService = new BrandService();
 
     useEffect(()=>{
-        (editMode) && setBrand(brandToEdit);
+        if(brandToEdit){
+            setEditMode(true);
+            setBrand(brandToEdit);
+        }
     },[open]);
 
     const handleDialogClose = () => {

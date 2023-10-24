@@ -6,7 +6,6 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputSwitch } from "primereact/inputswitch";
 import { Galleria } from 'primereact/galleria';
-import { Toast } from 'primereact/toast';
 import { Paginator } from "primereact/paginator";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -18,7 +17,6 @@ const Product = () => {
     const [totalElements, setTotalElements] = useState(0);
     const [productPage, setProductPage] = useState([]);
     const [open, setOpen] = useState(false);
-    const [editMode, setEditMode] = useState(false)
     const [product, setProduct] = useState({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true, images: []});  
     const [imageDialogOpen, setImageDialogOpen] = useState(false)
     const [dialogImages, setDialogImages] = useState(null);
@@ -43,7 +41,6 @@ const Product = () => {
     const handleDialogClose = () => {
         requestProduct();
         setOpen(false);
-        setEditMode(false);
         setProduct({ name: '', description: '', costValue: 0, saleValue: 0, brand: {}, category: {}, status: true, images: [] });
     };
 
@@ -85,7 +82,6 @@ const Product = () => {
             status: selectedProduct.status,
             images: selectedProduct.images
         })
-        setEditMode(true);
         setOpen(true);
     };
 
@@ -187,7 +183,7 @@ const Product = () => {
                 <Galleria value={dialogImages} numVisible={7} circular
                     showItemNavigators item={itemTemplate} thumbnail={thumbnailTemplate} />
             </Dialog>
-            <ProductFormDialog open={open} productToEdit={product} editMode={editMode} onClose={handleDialogClose}/>
+            <ProductFormDialog open={open} productToEdit={product} onClose={handleDialogClose}/>
             <div className="m-3 ">
                 <DataTable
                     className="mt-8 "

@@ -12,9 +12,10 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { ProductService } from "../../service/ProductService";
 
-const ProductFormDialog = (open, productToEdit, editMode, onClose) => {
+const ProductFormDialog = ({open, productToEdit, onClose}) => {
     const [product, setProduct] = useState({ name: '', description: '', costValue: 0, saleValue: 0, category: {}, brand: {}, status: true, images: [] });
     const [brand, setBrand] = useState([]);
+    const [editMode, setEditMode] = useState(false);
     const [category, setCategory] = useState([]);
     const toast = useRef(null);
     const brandService = new BrandService();
@@ -27,7 +28,10 @@ const ProductFormDialog = (open, productToEdit, editMode, onClose) => {
             getCategoryWhenDialogOpen();
         }
 
-        editMode && setProduct(productToEdit);
+        if(productToEdit){
+            setEditMode(true);
+            setProduct(productToEdit);
+        }
     },[open])
 
     const handleDialogClose = () => {

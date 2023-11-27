@@ -1,36 +1,35 @@
 import React, { useEffect, useState } from "react";
+import { AddrStateService } from "../../service/AddrStateService";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputSwitch } from "primereact/inputswitch";
 import { Paginator } from "primereact/paginator";
-import CategoryDialog from "./CategoryDialog";
-import { CategoryService } from "../../service/CategoryService";
+import AddrStateDialog from "./AddrStateDialog";
 
 
 
-
-const CategoryTable = () => {
+const AddrStateTable = ()=>{
+    const [addrState, setAddrState] = useState({ name: '', acronym: '', status: true })
     const [open, setOpen] = useState(false);
-    const [categoryPage, setCategoryPage] = useState([]);
-    const [category, setCategory] = useState({ name: '', status: true });
+    const [addrStatePage, setAddrStatePage] = useState([]);
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(5);
     const [totalElements, setTotalElements] = useState(0);
-    const categoryService = new CategoryService();
+    const addrStateService = new AddrStateService();
 
     useEffect(() => {
-        requestCategory();
+        requestAddrState(first, rows);
     }, [])
 
     useEffect(() => {
-        requestCategory();
+        requestAddrState(first, rows);
     }, [first, rows])
 
     const handleDialogClose = () => {
+        setAddrState({ name: '', acronym: '', status: true })
+        requestAddrState();
         setOpen(false);
-        requestCategory();
-        setCategory({ name: "", status: true });
     };
 
     const handlePageChange = (event) => {
@@ -39,37 +38,34 @@ const CategoryTable = () => {
     }
 
 
-
-    const requestCategory = () => {
+    const requestAddrState = () => {
         const page = first / rows;
-        categoryService.get(page, rows)
+        addrStateService.get(page, rows)
             .then((response) => response.json())
             .then((data) => {
                 setTotalElements(data.totalElements);
-                setCategoryPage(data.content)
+                setAddrStatePage(data.content)
             })
     }
 
 
 
     const onDataStatusChangeClick = (data) => {
-        if (data.status) {
-            categoryService.delete(data.id).then(() => {
-                requestCategory()
-            });
+        if (data.status === true) {
+            addrStateService.delete(data.id)
+                .then(() => requestAddrState(first, rows));
 
         } else {
-            let cat = data;
-            cat.status = true;
-            categoryService.update(cat).then(() => requestCategory());
+            let addresState = data;
+            addresState.status = true;
+            addrStateService.update(addresState)
+                .then(() => requestAddrState(first, rows));
         }
-
     }
 
-    const handleEditButtonClick = (categoryId) => {
-        const object = categoryPage.find((object) => object.id === categoryId);
-        console.log(object);
-        setCategory({id: object.id, name: object.name, status: object.status });
+    const handleEditButtonClick = (addrStateId) => {
+        const selectedAddrState = (addrStatePage.find((addrState) => addrState.id === addrStateId));
+        setAddrState({ id: selectedAddrState.id, name: selectedAddrState.name, acronym: selectedAddrState.acronym, status: selectedAddrState.status });
         setOpen(true);
     };
 
@@ -88,7 +84,7 @@ const CategoryTable = () => {
     const updateDateBodyTemplate = (rowData) => {
         return formatDate(rowData.updateDate);
     };
-    const editCategoryTemplate = (rowData) => {
+    const editAddrStateTemplate = (rowData) => {
         return (
             <div>
                 <Button
@@ -102,35 +98,35 @@ const CategoryTable = () => {
         )
     }
 
-    const activeCategoryTemplate = (rowData) => {
+    const activeAddrStateTemplate = (rowData) => {
         return (
             <InputSwitch checked={rowData.status} onChange={() => onDataStatusChangeClick(rowData)} />
         );
     };
-
     const header = () => {
         return (
             <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-                <span className="text-xl text-red-500 font-bold">Categoria</span>
+                <span className="text-xl text-red-500 font-bold">Estado</span>
                 <Button className="form-button  bg-red-500 border-transparent hover:bg-red-400 mr-0 mr-6" label="Cadastrar" onClick={() => setOpen(true)} />
             </div>
         )
     };
-    return (
-        <>
-            <CategoryDialog open={open} onclose={handleDialogClose} categoryToEdit={category} />
 
+    return (
+        <div className="w-full">
+            <AddrStateDialog open={open} addrStateToEdit={addrState} onClose={handleDialogClose} />
             <div className="m-3">
                 <DataTable
                     className="mt-8"
                     header={header}
-                    value={categoryPage}
+                    value={addrStatePage}
                 >
                     <Column field="name" header="Nome" sortable></Column>
+                    <Column field="acronym" header="Sigla" sortable></Column>
                     <Column body={createDateBodyTemplate} field="createDate" header="Criado em" sortable style={{ width: '12%' }} align={"left"}></Column>
                     <Column body={updateDateBodyTemplate} field="updateDate" header="Alterado em" sortable style={{ width: '13%' }} align={"left"}></Column>
-                    <Column body={editCategoryTemplate} header="Editar" style={{ width: '8%' }} align={"right"} />
-                    <Column body={activeCategoryTemplate} header="Ativa/Inativar" style={{ width: '15%' }} align={"center"} />
+                    <Column body={editAddrStateTemplate} header="Editar" style={{ width: '8%' }} align={"right"} />
+                    <Column body={activeAddrStateTemplate} header="Ativa/Inativar" style={{ width: '15%' }} align={"center"} />
                 </DataTable>
                 <Paginator
                     first={first}
@@ -140,9 +136,7 @@ const CategoryTable = () => {
                     onPageChange={handlePageChange}
                 />
             </div>
-        </>
-
-
+        </div>
     )
 }
-export default CategoryTable;
+export default AddrStateTable;

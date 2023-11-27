@@ -1,28 +1,44 @@
 package br.com.crispimlanches.loja_virtual_crispim.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Table(name = "address")
 @Data
 public class Address extends Auditable {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    private boolean mainAdress;
+    @Column(name = "main_address")
+    private boolean mainAddress;
+
+    @Column(name = "street")
     private String street;
 
+    @Column(name = "number")
     private String number;
+
+    @Column(name = "complement")
     private String complement;
+
+    @Column(name = "district")
     private String district;
+
+
     @ManyToOne
+    @Column(name = "city")
+    @JoinColumn(name = "city_id")
     private City city;
-    private String postCode;
+
+    @Column(name = "postal_code")
+    private String postalCode;
+
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
 }

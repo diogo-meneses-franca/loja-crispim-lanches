@@ -20,7 +20,7 @@ const CategoryDialog = ({open, onclose, categoryToEdit}) => {
             setCategory(categoryToEdit);
 
         }
-    },[editMode])
+    },[open])
     
     const handleDialogClose = ()=>{
         onclose();

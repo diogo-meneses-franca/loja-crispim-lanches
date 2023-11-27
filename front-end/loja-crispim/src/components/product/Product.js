@@ -7,9 +7,6 @@ import { Dialog } from 'primereact/dialog';
 import { InputSwitch } from "primereact/inputswitch";
 import { Galleria } from 'primereact/galleria';
 import { Paginator } from "primereact/paginator";
-import "primereact/resources/themes/lara-light-indigo/theme.css";
-import "primereact/resources/primereact.min.css";
-import 'primeicons/primeicons.css';
 import '../universal.css'
 import ProductFormDialog from "./ProductFormDialog";
 

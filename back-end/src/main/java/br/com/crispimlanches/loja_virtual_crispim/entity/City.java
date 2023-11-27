@@ -12,14 +12,17 @@ public class City extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "name")
     private String name;
 
     @ManyToOne
-    @JoinColumn(name ="idAddrState")
+    @JoinColumn(name ="addrstate_id")
     private AddrState addrState;
 
+    @Column(name = "status")
     private Boolean status;
 
 

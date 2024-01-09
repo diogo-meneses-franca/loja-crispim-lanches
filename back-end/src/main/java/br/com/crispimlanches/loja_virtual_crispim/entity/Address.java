@@ -30,7 +30,6 @@ public class Address extends Auditable {
 
 
     @ManyToOne
-    @Column(name = "city")
     @JoinColumn(name = "city_id")
     private City city;
 

@@ -1,6 +1,6 @@
 export class CategoryService {
 
-    url = process.env.REACT_APP_URL_API;
+    url=process.env.REACT_APP_URL_API
 
     get(page, rowsPerPage) {
         const url = `${this.url}/category?page=${page}&size=${rowsPerPage}`;
